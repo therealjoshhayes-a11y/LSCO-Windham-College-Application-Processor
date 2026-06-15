@@ -5,50 +5,27 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from lsco_tdcj_intake.form_maps.geometry import field_rect, rect_to_pixel_box
 from lsco_tdcj_intake.form_maps.loader import load_all_maps
-from lsco_tdcj_intake.imaging.image_io import image_shape_text, read_image_bgr, write_image
+from lsco_tdcj_intake.imaging.field_cropper import (
+    CropPadding,
+    crop_field_from_file,
+    save_crop_result,
+)
+from lsco_tdcj_intake.imaging.image_io import image_shape_text, read_image_bgr
 
 
-# Debug crop profiles are NOT changes to the locked JSON maps.
-# They are scan/review crop-window adjustments after fiducial warp.
-FIELD_CROP_PROFILES: dict[tuple[int, str], dict[str, int]] = {
-    (1, "p1_last_name"): {
-        "pad_left": 35,
-        "pad_top": 40,
-        "pad_right": 20,
-        "pad_bottom": -45,
-    },
-}
+def resolve_padding_override(args: argparse.Namespace) -> CropPadding | None:
+    """Return CLI crop padding override if any pad value was provided."""
+    values = [args.pad_left, args.pad_top, args.pad_right, args.pad_bottom]
+    if all(value is None for value in values):
+        return None
 
-
-def clamp_crop_box(
-    left: int,
-    top: int,
-    right: int,
-    bottom: int,
-    image_width: int,
-    image_height: int,
-) -> tuple[int, int, int, int]:
-    """Keep a crop box inside the image bounds."""
-    return (
-        max(left, 0),
-        max(top, 0),
-        min(right, image_width),
-        min(bottom, image_height),
+    return CropPadding(
+        left=args.pad_left or 0,
+        top=args.pad_top or 0,
+        right=args.pad_right or 0,
+        bottom=args.pad_bottom or 0,
     )
-
-
-def resolve_padding(args: argparse.Namespace) -> dict[str, int]:
-    """Return field-specific padding, overridden by explicit CLI values."""
-    profile = FIELD_CROP_PROFILES.get((args.page, args.field), {})
-
-    return {
-        "pad_left": args.pad_left if args.pad_left is not None else profile.get("pad_left", 0),
-        "pad_top": args.pad_top if args.pad_top is not None else profile.get("pad_top", 0),
-        "pad_right": args.pad_right if args.pad_right is not None else profile.get("pad_right", 0),
-        "pad_bottom": args.pad_bottom if args.pad_bottom is not None else profile.get("pad_bottom", 0),
-    }
 
 
 def main() -> None:
@@ -73,58 +50,34 @@ def main() -> None:
 
     maps = load_all_maps()
     form_map = maps[args.page]
+    padding_override = resolve_padding_override(args)
 
-    if args.field not in form_map.fields:
-        raise KeyError(f"Field not found on page {args.page}: {args.field}")
-
-    padding = resolve_padding(args)
+    result = crop_field_from_file(
+        warped_image_path=Path(args.warped_image_path),
+        form_map=form_map,
+        field_id=args.field,
+        dpi=args.dpi,
+        padding=padding_override,
+    )
+    save_crop_result(result, Path(args.output))
 
     image = read_image_bgr(Path(args.warped_image_path))
-    image_height, image_width = image.shape[:2]
-
-    rect = field_rect(form_map.fields[args.field])
-    left, top, right, bottom = rect_to_pixel_box(rect, args.dpi)
-
-    adjusted_left = left - padding["pad_left"]
-    adjusted_top = top - padding["pad_top"]
-    adjusted_right = right + padding["pad_right"]
-    adjusted_bottom = bottom + padding["pad_bottom"]
-
-    adjusted_box = clamp_crop_box(
-        adjusted_left,
-        adjusted_top,
-        adjusted_right,
-        adjusted_bottom,
-        image_width=image_width,
-        image_height=image_height,
-    )
-
-    crop_left, crop_top, crop_right, crop_bottom = adjusted_box
-    crop = image[crop_top:crop_bottom, crop_left:crop_right]
-
-    if crop.size == 0:
-        raise ValueError(
-            f"Crop is empty for {args.field}: {adjusted_box} "
-            f"from image {image_shape_text(image)}"
-        )
-
-    write_image(Path(args.output), crop)
 
     print(f"Input:     {args.warped_image_path}")
     print(f"Shape:     {image_shape_text(image)}")
-    print(f"Page:      {args.page}")
-    print(f"Field:     {args.field}")
+    print(f"Page:      {result.page_number}")
+    print(f"Field:     {result.field_id}")
     print(
-        f"Rect:      x={rect.x:.3f}, y={rect.y:.3f}, "
-        f"w={rect.width:.3f}, h={rect.height:.3f} pt"
+        f"Rect:      x={result.rect.x:.3f}, y={result.rect.y:.3f}, "
+        f"w={result.rect.width:.3f}, h={result.rect.height:.3f} pt"
     )
-    print(f"Base crop: {(left, top, right, bottom)} px at {args.dpi} dpi")
+    print(f"Base crop: {result.base_box} px at {args.dpi} dpi")
     print(
         "Padding:   "
-        f"L={padding['pad_left']}, T={padding['pad_top']}, "
-        f"R={padding['pad_right']}, B={padding['pad_bottom']} px"
+        f"L={result.padding.left}, T={result.padding.top}, "
+        f"R={result.padding.right}, B={result.padding.bottom} px"
     )
-    print(f"Final:     {adjusted_box} px")
+    print(f"Final:     {result.final_box} px")
     print(f"Output:    {args.output}")
 
 
