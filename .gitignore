@@ -47,3 +47,6 @@ data/rejected/
 !forms/LSCO_TDCJ_Application_v5_green/maps_derivatives/README.md
 
 # Canonical PDFs/XLSX should stay local unless intentionally force-added.
+
+# Editable install metadata
+src/*.egg-info/
