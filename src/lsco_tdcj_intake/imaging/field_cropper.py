@@ -39,6 +39,7 @@ class FieldCropResult:
 # They are NOT changes to the locked JSON maps.
 FIELD_CROP_PROFILES: dict[tuple[int, str], CropPadding] = {
     (1, "p1_last_name"): CropPadding(left=35, top=40, right=20, bottom=-45),
+    (2, "p2_sectionB_name"): CropPadding(left=110, top=-15, right=10, bottom=35),
 }
 
 
