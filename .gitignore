@@ -1,7 +1,19 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments / secrets
 .venv/
 .env
+.env.*
+
+# VS Code local settings
+.vscode/
+!.vscode/extensions.json
 
 # FERPA / student data exclusions
 data/incoming/
@@ -10,12 +22,13 @@ data/reviewed/
 data/archive/
 data/rejected/
 
-# Generated files
+# Generated outputs
 *.log
 *.tmp
 *.bak
+*.jsonl
 
-# Scans and exports
+# Scans, images, PDFs, and exports
 *.png
 *.jpg
 *.jpeg
@@ -24,6 +37,13 @@ data/rejected/
 *.pdf
 *.csv
 *.xlsx
-*.jsonl
 
-# Canonical assets can be force-added intentionally.
+# Keep folder placeholders
+!.gitkeep
+
+# Allow locked non-student JSON maps and markdown docs
+!forms/LSCO_TDCJ_Application_v5_green/maps_locked/*.json
+!forms/LSCO_TDCJ_Application_v5_green/maps_locked/*.md
+!forms/LSCO_TDCJ_Application_v5_green/maps_derivatives/README.md
+
+# Canonical PDFs/XLSX should stay local unless intentionally force-added.
