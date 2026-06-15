@@ -1,0 +1,14 @@
+opencv-python
+pillow
+pypdf
+pypdfium2
+reportlab
+pandas
+openpyxl
+pyyaml
+python-dotenv
+pytesseract
+streamlit
+numpy
+rapidfuzz
+pytest

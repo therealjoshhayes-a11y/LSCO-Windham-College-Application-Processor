@@ -1,0 +1,29 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# FERPA / student data exclusions
+data/incoming/
+data/working/
+data/reviewed/
+data/archive/
+data/rejected/
+
+# Generated files
+*.log
+*.tmp
+*.bak
+
+# Scans and exports
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+*.pdf
+*.csv
+*.xlsx
+*.jsonl
+
+# Canonical assets can be force-added intentionally.

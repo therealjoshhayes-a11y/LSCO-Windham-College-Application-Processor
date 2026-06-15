@@ -1,0 +1,669 @@
+{
+  "document_id": "LSCO_TDCJ_Application_v5_green",
+  "revision": "02/2026",
+  "page_number": 2,
+  "width": 612.0,
+  "height": 792.0,
+  "dpi": 72,
+  "source_note": "Coordinates extracted from vector geometry and text positions on blank page 2 of the source PDF.",
+  "render_rules": {
+    "boxed_text": {
+      "horizontal": "cell_centered",
+      "vertical": "cell_centered",
+      "step_adjust": -2,
+      "vertical_adjust": -3
+    },
+    "checkbox": {
+      "placement": "centroid"
+    },
+    "line_text": {
+      "alignment": "baseline_start"
+    },
+    "overflow": {
+      "behavior": "truncate"
+    },
+    "null_handling": {
+      "render": "skip"
+    }
+  },
+  "anchors": {
+    "p2_page_top_left": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "p2_page_top_right": {
+      "x": 612.0,
+      "y": 0.0
+    },
+    "p2_page_bottom_left": {
+      "x": 0.0,
+      "y": 792.0
+    },
+    "p2_page_bottom_right": {
+      "x": 612.0,
+      "y": 792.0
+    },
+    "p2_header_rule_left": {
+      "x": 36.0,
+      "y": 44.36
+    },
+    "p2_header_rule_right": {
+      "x": 576.0,
+      "y": 44.36
+    },
+    "p2_sectionA_title_left": {
+      "x": 40.0,
+      "y": 47.4
+    },
+    "p2_sectionB_rule_left": {
+      "x": 36.0,
+      "y": 400.612
+    },
+    "p2_sectionB_rule_right": {
+      "x": 576.0,
+      "y": 400.612
+    },
+    "p2_sectionB_bar_left_top": {
+      "x": 36.0,
+      "y": 402.612
+    },
+    "p2_authorized_persons_table_left": {
+      "x": 36.0,
+      "y": 197.14
+    },
+    "p2_authorized_persons_table_right": {
+      "x": 576.0,
+      "y": 277.919
+    },
+    "p2_authorized_persons_divider": {
+      "x": 252.0,
+      "y": 197.14
+    },
+    "p2_sectionA_sig_line_start": {
+      "x": 36.0,
+      "y": 374.612
+    },
+    "p2_sectionA_sig_line_end": {
+      "x": 295.2,
+      "y": 374.612
+    },
+    "p2_sectionA_date_line_start": {
+      "x": 475.2,
+      "y": 374.612
+    },
+    "p2_sectionA_date_line_end": {
+      "x": 576.0,
+      "y": 374.612
+    },
+    "p2_sectionB_student_sig_line_start": {
+      "x": 36.0,
+      "y": 666.632
+    },
+    "p2_sectionB_student_sig_line_end": {
+      "x": 295.2,
+      "y": 666.632
+    },
+    "p2_sectionB_student_date_line_start": {
+      "x": 475.2,
+      "y": 666.632
+    },
+    "p2_sectionB_student_date_line_end": {
+      "x": 576.0,
+      "y": 666.632
+    },
+    "p2_sectionB_auth_sig_line_start": {
+      "x": 36.0,
+      "y": 707.632
+    },
+    "p2_sectionB_auth_sig_line_end": {
+      "x": 295.2,
+      "y": 707.632
+    },
+    "p2_sectionB_auth_date_line_start": {
+      "x": 475.2,
+      "y": 707.632
+    },
+    "p2_sectionB_auth_date_line_end": {
+      "x": 576.0,
+      "y": 707.632
+    }
+  },
+  "locked_zones": [
+    {
+      "id": "p2_header_block",
+      "x": 20.0,
+      "y": 13.0,
+      "width": 579.0,
+      "height": 55.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_sectionA_title",
+      "x": 36.0,
+      "y": 47.0,
+      "width": 395.0,
+      "height": 20.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_sectionA_description_paragraph",
+      "x": 36.0,
+      "y": 133.5,
+      "width": 540.0,
+      "height": 55.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_authorized_persons_header",
+      "x": 36.0,
+      "y": 197.14,
+      "width": 540.0,
+      "height": 11.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_disclosure_heading",
+      "x": 36.0,
+      "y": 277.6,
+      "width": 180.0,
+      "height": 14.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_disclosure_labels_left_col",
+      "x": 52.2,
+      "y": 291.2,
+      "width": 250.0,
+      "height": 64.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_disclosure_labels_right_col",
+      "x": 322.2,
+      "y": 291.2,
+      "width": 255.0,
+      "height": 64.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_sectionA_signature_label",
+      "x": 36.0,
+      "y": 376.0,
+      "width": 189.0,
+      "height": 12.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_sectionA_date_label",
+      "x": 475.2,
+      "y": 376.0,
+      "width": 18.0,
+      "height": 12.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_admin_labels_left",
+      "x": 36.0,
+      "y": 385.0,
+      "width": 190.0,
+      "height": 10.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_admin_verified_label",
+      "x": 183.3149871826172,
+      "y": 385.0870056152344,
+      "width": 43.959991455078125,
+      "height": 9.61798095703125,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_admin_processed_label",
+      "x": 269.9610290527344,
+      "y": 385.0870056152344,
+      "width": 44.352020263671875,
+      "height": 9.61798095703125,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_admin_distribution_label",
+      "x": 429.1679992675781,
+      "y": 385.0870056152344,
+      "width": 146.9,
+      "height": 9.61798095703125,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_sectionB_bar",
+      "x": 36.0,
+      "y": 402.61199951171875,
+      "width": 540.0,
+      "height": 18.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_sectionB_description_block",
+      "x": 36.0,
+      "y": 467.5,
+      "width": 540.0,
+      "height": 153.5,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_sectionB_student_signature_label",
+      "x": 36.0,
+      "y": 667.0,
+      "width": 190.0,
+      "height": 12.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_sectionB_student_date_label",
+      "x": 475.2,
+      "y": 668.03,
+      "width": 18.0,
+      "height": 12.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_sectionB_auth_signature_label",
+      "x": 36.0,
+      "y": 710.0,
+      "width": 220.0,
+      "height": 12.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_sectionB_auth_date_label",
+      "x": 475.196,
+      "y": 709.99,
+      "width": 18.0,
+      "height": 12.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_legal_notice_block",
+      "x": 36.0,
+      "y": 720.5,
+      "width": 540.0,
+      "height": 24.5,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p2_footer",
+      "x": 285.5,
+      "y": 764.0,
+      "width": 41.0,
+      "height": 11.0,
+      "reason": "preprinted_form_content"
+    }
+  ],
+  "fields": {
+    "p2_sectionA_student_name": {
+      "type": "boxed_text_cells",
+      "cells": [
+        {
+          "cx": 161.43299102783203,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 182.69300079345703,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 203.95299530029297,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 225.2129898071289,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 246.47199249267578,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 267.73199462890625,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 288.99200439453125,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 310.25201416015625,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 331.5119934082031,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 352.7720031738281,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 374.0320129394531,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 395.291015625,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 416.5509948730469,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 437.8110046386719,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 459.0710144042969,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 480.33099365234375,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 501.59100341796875,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 522.8510131835938,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 544.1099853515625,
+          "cy": 77.989990234375
+        },
+        {
+          "cx": 565.3699951171875,
+          "cy": 77.989990234375
+        }
+      ],
+      "char_count": 20,
+      "render": {
+        "mode": "cell_centered"
+      }
+    },
+    "p2_sectionA_lsco_student_id": {
+      "type": "boxed_text_series",
+      "start_x": 374.0320129394531,
+      "center_y": 101.25,
+      "cell_width": 21.260009765625,
+      "char_count": 10
+    },
+    "p2_sectionA_access_code": {
+      "type": "boxed_text_series",
+      "start_x": 331.5119934082031,
+      "center_y": 124.510009765625,
+      "cell_width": 21.260009765625,
+      "char_count": 12
+    },
+    "p2_sectionA_row1_name_or_org": {
+      "type": "free_text_region",
+      "x": 36.0,
+      "y": 208.13897705078125,
+      "width": 216.0,
+      "height": 23.260009765625,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p2_sectionA_row1_relationship": {
+      "type": "free_text_region",
+      "x": 252.0,
+      "y": 208.13897705078125,
+      "width": 324.0,
+      "height": 23.260009765625,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p2_sectionA_row2_name_or_org": {
+      "type": "free_text_region",
+      "x": 36.0,
+      "y": 231.39898681640625,
+      "width": 216.0,
+      "height": 23.260009765625,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p2_sectionA_row2_relationship": {
+      "type": "free_text_region",
+      "x": 252.0,
+      "y": 231.39898681640625,
+      "width": 324.0,
+      "height": 23.260009765625,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p2_sectionA_row3_name_or_org": {
+      "type": "free_text_region",
+      "x": 36.0,
+      "y": 254.65899658203125,
+      "width": 216.0,
+      "height": 23.260009765625,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p2_sectionA_row3_relationship": {
+      "type": "free_text_region",
+      "x": 252.0,
+      "y": 254.65899658203125,
+      "width": 324.0,
+      "height": 23.260009765625,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p2_disclosure_attendance_in_courses": {
+      "type": "checkbox",
+      "cx": 43.08650016784668,
+      "cy": 295.83250427246094,
+      "box_width": 14.17300033569336,
+      "box_height": 14.173004150390625
+    },
+    "p2_disclosure_grades_in_courses": {
+      "type": "checkbox",
+      "cx": 313.0865020751953,
+      "cy": 295.83250427246094,
+      "box_width": 14.173004150390625,
+      "box_height": 14.173004150390625
+    },
+    "p2_disclosure_teacher_ratings_observations": {
+      "type": "checkbox",
+      "cx": 43.08650016784668,
+      "cy": 313.00550842285156,
+      "box_width": 14.17300033569336,
+      "box_height": 14.173004150390625
+    },
+    "p2_disclosure_extracurricular_activities_projects": {
+      "type": "checkbox",
+      "cx": 313.0865020751953,
+      "cy": 313.00550842285156,
+      "box_width": 14.173004150390625,
+      "box_height": 14.173004150390625
+    },
+    "p2_disclosure_placement_test_scores": {
+      "type": "checkbox",
+      "cx": 43.08650016784668,
+      "cy": 330.1794891357422,
+      "box_width": 14.17300033569336,
+      "box_height": 14.173004150390625
+    },
+    "p2_disclosure_interest_inventory_results": {
+      "type": "checkbox",
+      "cx": 313.0865020751953,
+      "cy": 330.1794891357422,
+      "box_width": 14.173004150390625,
+      "box_height": 14.173004150390625
+    },
+    "p2_disclosure_financial_aid_information": {
+      "type": "checkbox",
+      "cx": 43.08650016784668,
+      "cy": 347.3524932861328,
+      "box_width": 14.17300033569336,
+      "box_height": 14.173004150390625
+    },
+    "p2_disclosure_business_office_transactions": {
+      "type": "checkbox",
+      "cx": 313.0865020751953,
+      "cy": 347.3524932861328,
+      "box_width": 14.173004150390625,
+      "box_height": 14.173004150390625
+    },
+    "p2_sectionA_student_signature": {
+      "type": "line_text",
+      "start_x": 36.0,
+      "baseline_y": 373.11199951171875,
+      "max_width": 259.20001220703125
+    },
+    "p2_sectionA_student_signature_date": {
+      "type": "line_text",
+      "start_x": 475.20001220703125,
+      "baseline_y": 373.11199951171875,
+      "max_width": 100.79998779296875
+    },
+    "p2_sectionA_verified_id_by": {
+      "type": "line_text",
+      "start_x": 229.22097778320312,
+      "baseline_y": 388.39599609375,
+      "max_width": 31.135986328125
+    },
+    "p2_sectionA_processed_by": {
+      "type": "line_text",
+      "start_x": 316.2590637207031,
+      "baseline_y": 388.39599609375,
+      "max_width": 31.135986328125
+    },
+    "p2_sectionB_name": {
+      "type": "boxed_text_cells",
+      "cells": [
+        {
+          "cx": 79.96999740600586,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 101.22999954223633,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 122.48999786376953,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 143.74999237060547,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 165.00899505615234,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 186.26900482177734,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 207.52899932861328,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 228.78899383544922,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 250.04901123046875,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 271.3089904785156,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 292.5679931640625,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 313.8280029296875,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 335.0880126953125,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 356.3479919433594,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 377.6080017089844,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 398.8680114746094,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 420.12701416015625,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 441.3869934082031,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 462.6470031738281,
+          "cy": 434.24200439453125
+        },
+        {
+          "cx": 483.9070129394531,
+          "cy": 434.24200439453125
+        }
+      ],
+      "char_count": 20,
+      "render": {
+        "mode": "cell_centered"
+      }
+    },
+    "p2_sectionB_tdcj_number": {
+      "type": "boxed_text_series",
+      "start_x": 87.18999862670898,
+      "center_y": 457.5019836425781,
+      "cell_width": 21.26000213623047,
+      "char_count": 10
+    },
+    "p2_sectionB_unit": {
+      "type": "boxed_text_series",
+      "start_x": 333.3380126953125,
+      "center_y": 457.5019836425781,
+      "cell_width": 21.260009765625,
+      "char_count": 11
+    },
+    "p2_sectionB_student_offender_signature": {
+      "type": "line_text",
+      "start_x": 36.0,
+      "baseline_y": 665.1317138671875,
+      "max_width": 259.20001220703125
+    },
+    "p2_sectionB_student_offender_signature_date": {
+      "type": "line_text",
+      "start_x": 475.20001220703125,
+      "baseline_y": 665.1317138671875,
+      "max_width": 100.79998779296875
+    },
+    "p2_sectionB_authorized_representative_signature": {
+      "type": "line_text",
+      "start_x": 36.0,
+      "baseline_y": 706.1317138671875,
+      "max_width": 259.20001220703125
+    },
+    "p2_sectionB_authorized_representative_signature_date": {
+      "type": "line_text",
+      "start_x": 475.20001220703125,
+      "baseline_y": 706.1317138671875,
+      "max_width": 100.79998779296875
+    }
+  },
+  "archive_status": "LOCKED_FINAL",
+  "archive_note": "Canonical final Page 2 JSON for LSCO TDCJ Application v5 green form."
+}

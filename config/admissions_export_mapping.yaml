@@ -1,0 +1,14 @@
+# Initial export mapping. Blanks remain blank unless Admissions approves a default.
+TXST ID: null
+Last Name: p1_last_name
+First Name: p1_first_name
+Middle Name: p1_mi
+Date of Birth: p1_date_of_birth
+Legal Sex: null
+SSN: p1_ssn
+High School - Name: p1_hs_name
+College 1 - Name: p1_prev_college_row1_name
+College 2 - Name: p1_prev_college_row2_name
+Start Term: derived_start_term
+Student Type: derived_student_type
+Major: p1_degree_cert_code

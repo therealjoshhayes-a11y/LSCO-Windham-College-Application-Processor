@@ -1,0 +1,533 @@
+{
+  "document_id": "LSCO_TDCJ_Application_v5_green",
+  "revision": "02/2026",
+  "page_number": 1,
+  "width": 612.0,
+  "height": 792.0,
+  "dpi": 72,
+  "source_note": "Coordinates extracted from vector geometry on blank page 1 of the source PDF.",
+  "render_rules": {
+    "boxed_text": {
+      "horizontal": "cell_centered",
+      "vertical": "cell_centered",
+      "step_adjust": -2,
+      "vertical_adjust": -3
+    },
+    "checkbox": {
+      "placement": "centroid"
+    },
+    "line_text": {
+      "alignment": "baseline_start"
+    },
+    "overflow": {
+      "behavior": "truncate"
+    },
+    "null_handling": {
+      "render": "skip"
+    }
+  },
+  "anchors": {
+    "p1_page_top_left": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "p1_page_top_right": {
+      "x": 612.0,
+      "y": 0.0
+    },
+    "p1_page_bottom_left": {
+      "x": 0.0,
+      "y": 792.0
+    },
+    "p1_page_bottom_right": {
+      "x": 612.0,
+      "y": 792.0
+    },
+    "p1_header_rule_left": {
+      "x": 36.0,
+      "y": 64.36
+    },
+    "p1_header_rule_right": {
+      "x": 576.0,
+      "y": 64.36
+    },
+    "p1_bar_enrollment_left_top": {
+      "x": 36.0,
+      "y": 80.36
+    },
+    "p1_bar_personal_left_top": {
+      "x": 36.0,
+      "y": 175.14
+    },
+    "p1_bar_demographics_left_top": {
+      "x": 36.0,
+      "y": 334.699
+    },
+    "p1_bar_education_left_top": {
+      "x": 36.0,
+      "y": 445.651
+    },
+    "p1_sig_student_line_start": {
+      "x": 36.0,
+      "y": 718.21
+    },
+    "p1_sig_student_line_end": {
+      "x": 295.2,
+      "y": 718.21
+    },
+    "p1_sig_date_line_start": {
+      "x": 475.2,
+      "y": 718.21
+    },
+    "p1_sig_date_line_end": {
+      "x": 576.0,
+      "y": 718.21
+    },
+    "p1_prev_college_table_left": {
+      "x": 36.0,
+      "y": 565.43
+    },
+    "p1_prev_college_table_right": {
+      "x": 596.756,
+      "y": 642.26
+    }
+  },
+  "locked_zones": [
+    {
+      "id": "p1_header_block",
+      "x": 20.0,
+      "y": 13.0,
+      "width": 579.0,
+      "height": 56.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p1_instruction_line",
+      "x": 36.0,
+      "y": 66.0,
+      "width": 400.0,
+      "height": 13.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p1_tdcj_unit_block",
+      "x": 36.0,
+      "y": 463.0,
+      "width": 360.0,
+      "height": 18.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p1_certification_paragraph",
+      "x": 36.0,
+      "y": 643.0,
+      "width": 540.0,
+      "height": 52.0,
+      "reason": "preprinted_form_content"
+    },
+    {
+      "id": "p1_footer",
+      "x": 250.0,
+      "y": 760.0,
+      "width": 120.0,
+      "height": 20.0,
+      "reason": "preprinted_form_content"
+    }
+  ],
+  "fields": {
+    "p1_student_type_first_time": {
+      "type": "checkbox",
+      "cx": 119.481,
+      "cy": 107.486,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_student_type_returning": {
+      "type": "checkbox",
+      "cx": 190.654,
+      "cy": 107.486,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_student_type_transfer": {
+      "type": "checkbox",
+      "cx": 260.629,
+      "cy": 107.486,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_term_fall": {
+      "type": "checkbox",
+      "cx": 76.703,
+      "cy": 124.586,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_term_spring": {
+      "type": "checkbox",
+      "cx": 116.713,
+      "cy": 124.586,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_term_summer": {
+      "type": "checkbox",
+      "cx": 170.793,
+      "cy": 124.586,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_year": {
+      "type": "boxed_text_series",
+      "start_x": 501.591,
+      "center_y": 128.13,
+      "cell_width": 21.26,
+      "char_count": 4
+    },
+    "p1_intent_assoc_deg": {
+      "type": "checkbox",
+      "cx": 79.749,
+      "cy": 141.786,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_intent_certificate": {
+      "type": "checkbox",
+      "cx": 161.339,
+      "cy": 141.786,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_intent_enrichment": {
+      "type": "checkbox",
+      "cx": 233.139,
+      "cy": 141.786,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_intent_transfer": {
+      "type": "checkbox",
+      "cx": 311.056,
+      "cy": 141.786,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_intent_skills_employ": {
+      "type": "checkbox",
+      "cx": 374.298,
+      "cy": 141.786,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_degree_cert_code": {
+      "type": "boxed_text_series",
+      "start_x": 374.032,
+      "center_y": 162.55,
+      "cell_width": 21.26,
+      "char_count": 10
+    },
+    "p1_ssn": {
+      "type": "boxed_text_series",
+      "start_x": 387.291,
+      "center_y": 205.769,
+      "cell_width": 21.26,
+      "char_count": 9
+    },
+    "p1_tdcj_number": {
+      "type": "boxed_text_series",
+      "start_x": 374.032,
+      "center_y": 229.029,
+      "cell_width": 21.26,
+      "char_count": 10
+    },
+    "p1_date_of_birth": {
+      "type": "boxed_text_series",
+      "start_x": 408.551,
+      "center_y": 252.289,
+      "cell_width": 21.26,
+      "char_count": 8
+    },
+    "p1_last_name": {
+      "type": "boxed_text_series",
+      "start_x": 161.433,
+      "center_y": 275.549,
+      "cell_width": 21.26,
+      "char_count": 20
+    },
+    "p1_first_name": {
+      "type": "boxed_text_series",
+      "start_x": 110.199,
+      "center_y": 298.809,
+      "cell_width": 21.26,
+      "char_count": 14
+    },
+    "p1_mi": {
+      "type": "boxed_text_series",
+      "start_x": 565.37,
+      "center_y": 298.809,
+      "cell_width": 21.26,
+      "char_count": 1
+    },
+    "p1_former_name": {
+      "type": "boxed_text_series",
+      "start_x": 161.433,
+      "center_y": 322.069,
+      "cell_width": 21.26,
+      "char_count": 20
+    },
+    "p1_ethnicity_hispanic_latino": {
+      "type": "checkbox",
+      "cx": 96.261,
+      "cy": 361.786,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_ethnicity_not_hispanic_latino": {
+      "type": "checkbox",
+      "cx": 193.745,
+      "cy": 361.786,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_race_white": {
+      "type": "checkbox",
+      "cx": 76.098,
+      "cy": 378.958,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_race_black_african_american": {
+      "type": "checkbox",
+      "cx": 126.503,
+      "cy": 378.958,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_race_asian": {
+      "type": "checkbox",
+      "cx": 272.654,
+      "cy": 378.958,
+      "box_width": 14.112,
+      "box_height": 14.173
+    },
+    "p1_race_american_indian": {
+      "type": "checkbox",
+      "cx": 330.687,
+      "cy": 378.958,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_race_native_hawaiian_pacific_islander": {
+      "type": "checkbox",
+      "cx": 76.098,
+      "cy": 396.131,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_race_two_or_more": {
+      "type": "checkbox",
+      "cx": 273.036,
+      "cy": 396.132,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_race_unknown": {
+      "type": "checkbox",
+      "cx": 358.057,
+      "cy": 396.132,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_citizenship_us_citizen": {
+      "type": "checkbox",
+      "cx": 108.481,
+      "cy": 413.304,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_citizenship_permanent_resident_alien": {
+      "type": "checkbox",
+      "cx": 188.839,
+      "cy": 413.304,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_alien_reg_no": {
+      "type": "boxed_text_series",
+      "start_x": 374.032,
+      "center_y": 433.021,
+      "cell_width": 21.26,
+      "char_count": 10
+    },
+    "p1_tdcj_unit_locked_text": {
+      "type": "locked",
+      "reason": "preprinted_form_content",
+      "zone_id": "p1_tdcj_unit_block"
+    },
+    "p1_hs_graduate_yes": {
+      "type": "checkbox",
+      "cx": 119.492,
+      "cy": 487.741,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_hs_graduate_no": {
+      "type": "checkbox",
+      "cx": 160.734,
+      "cy": 487.741,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_hs_name": {
+      "type": "boxed_text_series",
+      "start_x": 91.639,
+      "center_y": 507.435,
+      "cell_width": 21.26,
+      "char_count": 14
+    },
+    "p1_hs_state": {
+      "type": "boxed_text_series",
+      "start_x": 407.776,
+      "center_y": 507.435,
+      "cell_width": 21.26,
+      "char_count": 2
+    },
+    "p1_hs_year": {
+      "type": "boxed_text_series",
+      "start_x": 479.307,
+      "center_y": 507.435,
+      "cell_width": 21.26,
+      "char_count": 4
+    },
+    "p1_ged_yes": {
+      "type": "checkbox",
+      "cx": 76.703,
+      "cy": 527.151,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_ged_no": {
+      "type": "checkbox",
+      "cx": 117.945,
+      "cy": 527.151,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_ged_year": {
+      "type": "boxed_text_series",
+      "start_x": 501.591,
+      "center_y": 530.695,
+      "cell_width": 21.26,
+      "char_count": 4
+    },
+    "p1_bachelors_or_higher_yes": {
+      "type": "checkbox",
+      "cx": 159.4,
+      "cy": 544.325,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_bachelors_or_higher_no": {
+      "type": "checkbox",
+      "cx": 200.642,
+      "cy": 544.325,
+      "box_width": 14.173,
+      "box_height": 14.173
+    },
+    "p1_prev_college_row1_name": {
+      "type": "free_text_region",
+      "x": 36.0,
+      "y": 576.391,
+      "width": 297.638,
+      "height": 21.26,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p1_prev_college_row1_city_state": {
+      "type": "free_text_region",
+      "x": 337.638,
+      "y": 576.391,
+      "width": 170.078,
+      "height": 21.26,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p1_prev_college_row1_years_attended": {
+      "type": "free_text_region",
+      "x": 511.716,
+      "y": 576.391,
+      "width": 85.04,
+      "height": 21.26,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p1_prev_college_row2_name": {
+      "type": "free_text_region",
+      "x": 36.0,
+      "y": 598.651,
+      "width": 297.638,
+      "height": 21.26,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p1_prev_college_row2_city_state": {
+      "type": "free_text_region",
+      "x": 337.638,
+      "y": 598.651,
+      "width": 170.078,
+      "height": 21.26,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p1_prev_college_row2_years_attended": {
+      "type": "free_text_region",
+      "x": 511.716,
+      "y": 598.651,
+      "width": 85.04,
+      "height": 21.26,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p1_prev_college_row3_name": {
+      "type": "free_text_region",
+      "x": 36.0,
+      "y": 620.911,
+      "width": 297.638,
+      "height": 21.26,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p1_prev_college_row3_city_state": {
+      "type": "free_text_region",
+      "x": 337.638,
+      "y": 620.911,
+      "width": 170.078,
+      "height": 21.26,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p1_prev_college_row3_years_attended": {
+      "type": "free_text_region",
+      "x": 511.716,
+      "y": 620.911,
+      "width": 85.04,
+      "height": 21.26,
+      "padding_left": 4,
+      "padding_top": 2
+    },
+    "p1_student_signature": {
+      "type": "line_text",
+      "start_x": 36.0,
+      "baseline_y": 718.21,
+      "max_width": 259.2
+    },
+    "p1_student_signature_date": {
+      "type": "line_text",
+      "start_x": 475.2,
+      "baseline_y": 718.21,
+      "max_width": 100.8
+    }
+  },
+  "archive_status": "LOCKED_FINAL",
+  "archive_note": "Canonical final Page 1 JSON for LSCO TDCJ Application v5 green form."
+}

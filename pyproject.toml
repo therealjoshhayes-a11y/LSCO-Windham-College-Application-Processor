@@ -1,0 +1,9 @@
+[project]
+name = "lsco-tdcj-intake"
+version = "0.1.0"
+description = "LSCO TDCJ machine-readable application intake and review system"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

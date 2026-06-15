@@ -1,0 +1,34 @@
+headers:
+  - TXST ID
+  - Last Name
+  - First Name
+  - Middle Name
+  - Date of Birth
+  - Legal Sex
+  - Address - Street
+  - Address - Street 2
+  - Address - City
+  - Address - State
+  - Address - Zip
+  - Address - Country
+  - SSN
+  - Mobile Phone
+  - Phone
+  - Email Address
+  - Emergency - Last
+  - Emergency - First
+  - Emergency - Phone
+  - Emergency - Email
+  - High School - CEEB
+  - High School - Name
+  - College 1 - FICE
+  - College 1 - Name
+  - College 2 - FICE
+  - College 2 - Name
+  - Start Term
+  - Admission Type
+  - Admission Type
+  - Student Type
+  - Residency Status
+  - Major
+  - First Gen

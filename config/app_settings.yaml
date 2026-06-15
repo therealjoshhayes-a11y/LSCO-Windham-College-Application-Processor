@@ -1,0 +1,4 @@
+project_name: lsco-tdcj-intake
+standard_scan_dpi: 600
+canonical_pdf_dpi: 72
+preferred_scan_format: pdf
