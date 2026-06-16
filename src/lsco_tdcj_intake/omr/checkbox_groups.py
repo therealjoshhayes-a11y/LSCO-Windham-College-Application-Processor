@@ -185,11 +185,13 @@ def interpret_checkbox_group(
         elif result.checked is None:
             uncertain.append(option.value)
 
-    # Conservative rescue suggestion:
-    # If exactly one option is uncertain, all others are clearly unchecked,
-    # and the group requires exactly one, suggest it for human review.
-    # Do not mark it selected automatically.
+    # Review suggestions:
+    # - exactly_one: suggest the single uncertain option only when nothing was confidently selected.
+    # - zero_or_more / one_or_more: suggest all uncertain options for reviewer confirmation.
+    # These are never machine-accepted selections.
     if group.rule == "exactly_one" and not selected and len(uncertain) == 1:
+        suggested_selected = uncertain.copy()
+    elif group.rule in {"zero_or_more", "one_or_more"} and uncertain:
         suggested_selected = uncertain.copy()
 
     if uncertain:
@@ -197,8 +199,8 @@ def interpret_checkbox_group(
 
         if suggested_selected:
             message = (
-                f"Likely selected {suggested_selected[0]}; "
-                "mark is below checked threshold and requires review."
+                f"Machine accepted: {', '.join(selected) if selected else 'none'}. "
+                f"Review suggested: {', '.join(suggested_selected)}."
             )
         else:
             message = f"Uncertain checkbox result(s): {', '.join(uncertain)}"
