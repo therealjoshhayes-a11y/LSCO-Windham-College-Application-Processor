@@ -1,4 +1,11 @@
-"""Reusable field cropping from warped LSCO TDCJ page images."""
+"""Reusable field cropping from warped LSCO TDCJ page images.
+
+Locked JSON map coordinates are in PDF points.
+Warped page images may be 300 dpi, 600 dpi, or normalized to another size.
+
+Therefore, field crops must scale map coordinates to the ACTUAL warped image
+dimensions, not assume a fixed DPI.
+"""
 
 from __future__ import annotations
 
@@ -7,14 +14,14 @@ from pathlib import Path
 
 import numpy as np
 
-from lsco_tdcj_intake.form_maps.geometry import Rect, field_rect, rect_to_pixel_box
+from lsco_tdcj_intake.form_maps.geometry import Rect, field_rect
 from lsco_tdcj_intake.form_maps.loader import FormMap
 from lsco_tdcj_intake.imaging.image_io import read_image_bgr, write_image
 
 
 @dataclass(frozen=True)
 class CropPadding:
-    """Pixel padding around a field crop."""
+    """Pixel padding around a field crop after point-to-pixel scaling."""
 
     left: int = 0
     top: int = 0
@@ -32,13 +39,14 @@ class FieldCropResult:
     base_box: tuple[int, int, int, int]
     final_box: tuple[int, int, int, int]
     padding: CropPadding
+    image_shape: tuple[int, int]
     image: np.ndarray
 
 
 # These are scan/review crop-window adjustments after fiducial warp.
 # They are NOT changes to the locked JSON maps.
 FIELD_CROP_PROFILES: dict[tuple[int, str], CropPadding] = {
-    (1, "p1_last_name"): CropPadding(left=35, top=40, right=20, bottom=-45),
+    (1, "p1_last_name"): CropPadding(left=35, top=-15, right=20, bottom=15),
     (2, "p2_sectionB_name"): CropPadding(left=110, top=-15, right=10, bottom=35),
 }
 
@@ -72,11 +80,32 @@ def get_crop_padding(
     return FIELD_CROP_PROFILES.get((page_number, field_id), CropPadding())
 
 
+def rect_to_image_box(
+    rect: Rect,
+    form_map: FormMap,
+    image_width: int,
+    image_height: int,
+) -> tuple[int, int, int, int]:
+    """Convert a point-space map rectangle to an image crop box.
+
+    This intentionally uses actual image dimensions, not a fixed DPI.
+    """
+
+    scale_x = image_width / form_map.width
+    scale_y = image_height / form_map.height
+
+    left = int(round(rect.x * scale_x))
+    top = int(round(rect.y * scale_y))
+    right = int(round(rect.right * scale_x))
+    bottom = int(round(rect.bottom * scale_y))
+
+    return left, top, right, bottom
+
+
 def crop_field_from_image(
     image: np.ndarray,
     form_map: FormMap,
     field_id: str,
-    dpi: int,
     padding: CropPadding | None = None,
 ) -> FieldCropResult:
     """Crop one field from a warped page image."""
@@ -92,7 +121,12 @@ def crop_field_from_image(
     )
 
     rect = field_rect(form_map.fields[field_id])
-    left, top, right, bottom = rect_to_pixel_box(rect, dpi)
+    left, top, right, bottom = rect_to_image_box(
+        rect=rect,
+        form_map=form_map,
+        image_width=image_width,
+        image_height=image_height,
+    )
 
     adjusted_box = clamp_crop_box(
         left - resolved_padding.left,
@@ -119,6 +153,7 @@ def crop_field_from_image(
         base_box=(left, top, right, bottom),
         final_box=adjusted_box,
         padding=resolved_padding,
+        image_shape=(image_height, image_width),
         image=crop_image,
     )
 
@@ -127,16 +162,22 @@ def crop_field_from_file(
     warped_image_path: Path | str,
     form_map: FormMap,
     field_id: str,
-    dpi: int,
+    dpi: int | None = None,
     padding: CropPadding | None = None,
 ) -> FieldCropResult:
-    """Read a warped page image and crop one field."""
+    """Read a warped page image and crop one field.
+
+    dpi is accepted only for backward compatibility. It is not used.
+    Cropping scales to the actual warped image dimensions.
+    """
+
+    _ = dpi
     image = read_image_bgr(warped_image_path)
+
     return crop_field_from_image(
         image=image,
         form_map=form_map,
         field_id=field_id,
-        dpi=dpi,
         padding=padding,
     )
 
