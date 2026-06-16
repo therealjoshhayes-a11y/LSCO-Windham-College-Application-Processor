@@ -5,11 +5,10 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from PIL import Image, ImageSequence
+from PIL import Image
 
 
 def main() -> None:
-    """Extract every TIFF frame as a PNG."""
     parser = argparse.ArgumentParser()
     parser.add_argument("tiff_path", help="Path to multipage TIFF packet")
     parser.add_argument(
@@ -27,16 +26,22 @@ def main() -> None:
         raise FileNotFoundError(f"TIFF not found: {tiff_path}")
 
     with Image.open(tiff_path) as image:
-        frames = list(ImageSequence.Iterator(image))
+        frame_count = getattr(image, "n_frames", 1)
 
         print(f"Input:  {tiff_path}")
-        print(f"Frames: {len(frames)}")
+        print(f"Frames: {frame_count}")
         print(f"Output: {output_dir}")
 
-        for index, frame in enumerate(frames, start=1):
-            output_path = output_dir / f"{tiff_path.stem}_frame_{index:02d}.png"
-            frame.convert("RGB").save(output_path)
-            print(f"  Frame {index} -> {output_path}")
+        for index in range(frame_count):
+            image.seek(index)
+
+            # Critical: copy the active frame before moving the TIFF cursor.
+            frame = image.copy().convert("RGB")
+
+            output_path = output_dir / f"{tiff_path.stem}_frame_{index + 1:02d}.png"
+            frame.save(output_path)
+
+            print(f"  Frame {index + 1} -> {output_path}")
 
 
 if __name__ == "__main__":
