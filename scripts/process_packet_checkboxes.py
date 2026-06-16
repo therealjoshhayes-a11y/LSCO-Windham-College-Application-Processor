@@ -22,7 +22,17 @@ from lsco_tdcj_intake.packets.checkbox_pipeline import (  # noqa: E402
 
 STATUS_VALID = "valid"
 STATUS_NEEDS_REVIEW = "needs_review"
-STATUS_FAILED = "failed"
+STATUS_FAILED_PAGE_IDENTITY = "failed_page_identity"
+STATUS_FAILED_WARP = "failed_warp"
+STATUS_FAILED_PACKET_STRUCTURE = "failed_packet_structure"
+STATUS_FAILED_UNKNOWN = "failed_unknown"
+
+FAILED_STATUSES = {
+    STATUS_FAILED_PAGE_IDENTITY,
+    STATUS_FAILED_WARP,
+    STATUS_FAILED_PACKET_STRUCTURE,
+    STATUS_FAILED_UNKNOWN,
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -49,6 +59,36 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--checked-min", type=float, default=0.18)
 
     return parser.parse_args()
+
+
+def classify_failure(exc: Exception) -> str:
+    message = str(exc).lower()
+    exc_name = type(exc).__name__.lower()
+
+    if (
+        "page identity" in message
+        or "predicted_page" in message
+        or "expected page" in message
+    ):
+        return STATUS_FAILED_PAGE_IDENTITY
+
+    if (
+        "fiducial" in message
+        or "warp" in message
+        or "threshold_dark_regions" in message
+        or "could not write warped page" in message
+    ):
+        return STATUS_FAILED_WARP
+
+    if (
+        "expected at least 2 tiff frames" in message
+        or ("frame" in message and "not found" in message)
+        or "filenotfounderror" in exc_name
+        or "could not read image" in message
+    ):
+        return STATUS_FAILED_PACKET_STRUCTURE
+
+    return STATUS_FAILED_UNKNOWN
 
 
 def review_rows_from_packet(packet: dict) -> list[dict]:
@@ -191,7 +231,7 @@ def main() -> int:
         write_json(review_json, summary)
         write_csv(review_csv, summary["needs_review"] + summary["accepted"])
 
-        status = packet.get("packet_status", STATUS_FAILED)
+        status = packet.get("packet_status", STATUS_FAILED_UNKNOWN)
 
         print(f"Packet id: {packet_id}")
         print(f"Packet status: {status}")
@@ -205,10 +245,12 @@ def main() -> int:
         return 0 if status in {STATUS_VALID, STATUS_NEEDS_REVIEW} else 2
 
     except Exception as exc:
+        status = classify_failure(exc)
+
         failure = {
             "packet_id": packet_id,
             "source_tiff": str(args.tiff_path),
-            "packet_status": STATUS_FAILED,
+            "packet_status": status,
             "error_type": type(exc).__name__,
             "error": str(exc),
             "packet_root": str(packet_root),
@@ -218,7 +260,7 @@ def main() -> int:
         write_json(failure_json, failure)
 
         print(f"Packet id: {packet_id}")
-        print(f"Packet status: {STATUS_FAILED}")
+        print(f"Packet status: {status}")
         print(f"Failure JSON: {failure_json}")
         print(f"Error: {type(exc).__name__}: {exc}", file=sys.stderr)
 

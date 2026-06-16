@@ -72,7 +72,7 @@ def run_packet(tiff_path: Path, output_root: Path) -> dict:
     status = "unknown"
     accepted_count = None
     review_count = None
-    error = None
+    error = ""
 
     if packet_json.exists():
         with packet_json.open("r", encoding="utf-8") as f:
@@ -88,11 +88,13 @@ def run_packet(tiff_path: Path, output_root: Path) -> dict:
     if failure_json.exists():
         with failure_json.open("r", encoding="utf-8") as f:
             failure = json.load(f)
-        status = failure.get("packet_status", "failed")
-        error = failure.get("error")
+        status = failure.get("packet_status", "failed_unknown")
+        error = failure.get("error", "")
 
-    if completed.returncode not in {0, 1} and status != "needs_review":
-        status = "failed"
+    if completed.returncode not in {0, 1} and status not in {"valid", "needs_review"}:
+        if not status.startswith("failed_"):
+            status = "failed_unknown"
+
         if not error:
             error = completed.stderr.strip() or completed.stdout.strip()
 
@@ -108,7 +110,7 @@ def run_packet(tiff_path: Path, output_root: Path) -> dict:
         "review_json": str(review_json) if review_json.exists() else "",
         "review_csv": str(review_csv) if review_csv.exists() else "",
         "failure_json": str(failure_json) if failure_json.exists() else "",
-        "error": error or "",
+        "error": error,
     }
 
 
@@ -162,14 +164,14 @@ def main() -> int:
             f"review={row['review_count']}"
         )
 
-        if row["status"] == "failed" and not args.continue_on_error:
+        if row["status"].startswith("failed_") and not args.continue_on_error:
             write_manifest(args.manifest_csv, rows)
             print(f"Batch manifest written: {args.manifest_csv}")
             return 2
 
     write_manifest(args.manifest_csv, rows)
 
-    failed_count = sum(1 for row in rows if row["status"] == "failed")
+    failed_count = sum(1 for row in rows if row["status"].startswith("failed_"))
     review_count = sum(1 for row in rows if row["status"] == "needs_review")
     valid_count = sum(1 for row in rows if row["status"] == "valid")
 
