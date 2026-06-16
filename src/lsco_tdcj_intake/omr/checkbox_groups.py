@@ -50,6 +50,19 @@ CHECKBOX_GROUPS: dict[tuple[int, str], CheckboxGroup] = {
             CheckboxOption("summer", "p1_term_summer", "Summer"),
         ),
     ),
+    (1, "intent"): CheckboxGroup(
+        page_number=1,
+        group_id="intent",
+        label="Intent",
+        rule="exactly_one",
+        options=(
+            CheckboxOption("assoc_deg", "p1_intent_assoc_deg", "Assoc. Deg."),
+            CheckboxOption("certificate", "p1_intent_certificate", "Certificate"),
+            CheckboxOption("enrichment", "p1_intent_enrichment", "Enrichment"),
+            CheckboxOption("transfer", "p1_intent_transfer", "Transfer"),
+            CheckboxOption("skills_employ", "p1_intent_skills_employ", "Skills/Employ."),
+        ),
+    ),
 }
 
 
