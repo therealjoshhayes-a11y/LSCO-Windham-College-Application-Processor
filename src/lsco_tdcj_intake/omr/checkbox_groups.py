@@ -28,6 +28,17 @@ class CheckboxGroup:
 
 
 CHECKBOX_GROUPS: dict[tuple[int, str], CheckboxGroup] = {
+    (1, "student_type"): CheckboxGroup(
+        page_number=1,
+        group_id="student_type",
+        label="Student Type",
+        rule="exactly_one",
+        options=(
+            CheckboxOption("first_time", "p1_student_type_first_time", "First Time"),
+            CheckboxOption("returning", "p1_student_type_returning", "Returning"),
+            CheckboxOption("transfer", "p1_student_type_transfer", "Transfer"),
+        ),
+    ),
     (1, "term"): CheckboxGroup(
         page_number=1,
         group_id="term",
