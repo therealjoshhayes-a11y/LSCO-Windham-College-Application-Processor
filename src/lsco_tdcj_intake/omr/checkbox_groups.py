@@ -147,14 +147,13 @@ def interpret_checkbox_group(
 ) -> dict:
     selected: list[str] = []
     uncertain: list[str] = []
-    field_decisions: dict[str, dict] = {}
-
-    field_to_option = {option.field_id: option for option in group.options}
+    suggested_selected: list[str] = []
+    fields: dict[str, dict] = {}
 
     for option in group.options:
         result = results[option.field_id]
 
-        field_decisions[option.field_id] = {
+        fields[option.field_id] = {
             "value": option.value,
             "label": option.label,
             "decision": result.decision,
@@ -170,24 +169,44 @@ def interpret_checkbox_group(
         elif result.checked is None:
             uncertain.append(option.value)
 
+    # Conservative rescue suggestion:
+    # If exactly one option is uncertain, all others are clearly unchecked,
+    # and the group requires exactly one, suggest it for human review.
+    # Do not mark it selected automatically.
+    if group.rule == "exactly_one" and not selected and len(uncertain) == 1:
+        suggested_selected = uncertain.copy()
+
     if uncertain:
         status = "needs_review"
-        message = f"Uncertain checkbox result(s): {', '.join(uncertain)}"
+
+        if suggested_selected:
+            message = (
+                f"Likely selected {suggested_selected[0]}; "
+                "mark is below checked threshold and requires review."
+            )
+        else:
+            message = f"Uncertain checkbox result(s): {', '.join(uncertain)}"
+
     elif group.rule == "exactly_one" and len(selected) == 1:
         status = "valid"
         message = f"Selected {selected[0]}"
+
     elif group.rule == "exactly_one" and len(selected) == 0:
         status = "invalid"
         message = "No option selected; exactly one required."
+
     elif group.rule == "exactly_one" and len(selected) > 1:
         status = "invalid"
         message = f"Multiple options selected: {', '.join(selected)}"
+
     elif group.rule == "one_or_more" and len(selected) >= 1:
         status = "valid"
         message = f"Selected {', '.join(selected)}"
+
     elif group.rule == "one_or_more":
         status = "invalid"
         message = "No option selected; one or more required."
+
     else:
         status = "valid"
         message = f"Selected {', '.join(selected)}" if selected else "No options selected."
@@ -200,6 +219,7 @@ def interpret_checkbox_group(
         "status": status,
         "message": message,
         "selected": selected,
+        "suggested_selected": suggested_selected,
         "uncertain": uncertain,
-        "fields": field_decisions,
+        "fields": fields,
     }
