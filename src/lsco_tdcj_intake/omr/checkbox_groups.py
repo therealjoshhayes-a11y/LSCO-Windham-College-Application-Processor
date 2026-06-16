@@ -128,6 +128,22 @@ CHECKBOX_GROUPS: dict[tuple[int, str], CheckboxGroup] = {
             CheckboxOption("no", "p1_bachelors_or_higher_no", "No"),
         ),
     ),
+        (2, "disclosure_allowed"): CheckboxGroup(
+        page_number=2,
+        group_id="disclosure_allowed",
+        label="Disclosure Allowed",
+        rule="zero_or_more",
+        options=(
+            CheckboxOption("attendance_in_courses", "p2_disclosure_attendance_in_courses", "Attendance in course(s)"),
+            CheckboxOption("grades_in_courses", "p2_disclosure_grades_in_courses", "Grades in course(s)"),
+            CheckboxOption("teacher_ratings_observations", "p2_disclosure_teacher_ratings_observations", "Teacher ratings/observations"),
+            CheckboxOption("extracurricular_activities_projects", "p2_disclosure_extracurricular_activities_projects", "Extracurricular Activities/Projects"),
+            CheckboxOption("placement_test_scores", "p2_disclosure_placement_test_scores", "Placement test scores"),
+            CheckboxOption("interest_inventory_results", "p2_disclosure_interest_inventory_results", "Interest Inventory results"),
+            CheckboxOption("financial_aid_information", "p2_disclosure_financial_aid_information", "Financial Aid information"),
+            CheckboxOption("business_office_transactions", "p2_disclosure_business_office_transactions", "Business Office transactions"),
+        ),
+    ),
 }
 
 
