@@ -50,3 +50,5 @@ data/rejected/
 
 # Editable install metadata
 src/*.egg-info/
+
+data/
