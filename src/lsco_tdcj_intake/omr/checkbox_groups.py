@@ -63,6 +63,71 @@ CHECKBOX_GROUPS: dict[tuple[int, str], CheckboxGroup] = {
             CheckboxOption("skills_employ", "p1_intent_skills_employ", "Skills/Employ."),
         ),
     ),
+    (1, "ethnicity"): CheckboxGroup(
+        page_number=1,
+        group_id="ethnicity",
+        label="Ethnicity",
+        rule="exactly_one",
+        options=(
+            CheckboxOption("hispanic_latino", "p1_ethnicity_hispanic_latino", "Hispanic/Latino"),
+            CheckboxOption("not_hispanic_latino", "p1_ethnicity_not_hispanic_latino", "Not Hispanic/Latino"),
+        ),
+    ),
+    (1, "race"): CheckboxGroup(
+        page_number=1,
+        group_id="race",
+        label="Race",
+        rule="one_or_more",
+        options=(
+            CheckboxOption("white", "p1_race_white", "White"),
+            CheckboxOption("black_african_american", "p1_race_black_african_american", "Black/African American"),
+            CheckboxOption("asian", "p1_race_asian", "Asian"),
+            CheckboxOption("american_indian", "p1_race_american_indian", "American Indian"),
+            CheckboxOption("native_hawaiian_pacific_islander", "p1_race_native_hawaiian_pacific_islander", "Native Hawaiian/Pacific Islander"),
+            CheckboxOption("two_or_more", "p1_race_two_or_more", "Two or More"),
+            CheckboxOption("unknown", "p1_race_unknown", "Unknown"),
+        ),
+    ),
+    (1, "citizenship"): CheckboxGroup(
+        page_number=1,
+        group_id="citizenship",
+        label="Citizenship",
+        rule="exactly_one",
+        options=(
+            CheckboxOption("us_citizen", "p1_citizenship_us_citizen", "U.S. Citizen"),
+            CheckboxOption("permanent_resident_alien", "p1_citizenship_permanent_resident_alien", "Permanent Resident Alien"),
+        ),
+    ),
+    (1, "hs_graduate"): CheckboxGroup(
+        page_number=1,
+        group_id="hs_graduate",
+        label="HS Graduate",
+        rule="exactly_one",
+        options=(
+            CheckboxOption("yes", "p1_hs_graduate_yes", "Yes"),
+            CheckboxOption("no", "p1_hs_graduate_no", "No"),
+        ),
+    ),
+    (1, "ged"): CheckboxGroup(
+        page_number=1,
+        group_id="ged",
+        label="GED",
+        rule="exactly_one",
+        options=(
+            CheckboxOption("yes", "p1_ged_yes", "Yes"),
+            CheckboxOption("no", "p1_ged_no", "No"),
+        ),
+    ),
+    (1, "bachelors_or_higher"): CheckboxGroup(
+        page_number=1,
+        group_id="bachelors_or_higher",
+        label="Bachelor's or Higher",
+        rule="exactly_one",
+        options=(
+            CheckboxOption("yes", "p1_bachelors_or_higher_yes", "Yes"),
+            CheckboxOption("no", "p1_bachelors_or_higher_no", "No"),
+        ),
+    ),
 }
 
 
