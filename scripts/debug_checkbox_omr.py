@@ -18,6 +18,7 @@ from lsco_tdcj_intake.omr.checkbox import (  # noqa: E402
     detect_checkbox_mark,
     save_checkbox_debug_image,
 )
+from lsco_tdcj_intake.packets.page_identity import require_page  # noqa: E402
 
 
 def default_map_path(page: int) -> Path:
@@ -81,6 +82,13 @@ def main() -> int:
     image = cv2.imread(str(args.image), cv2.IMREAD_COLOR)
     if image is None:
         raise FileNotFoundError(f"Could not read image: {args.image}")
+
+    identity = require_page(args.image, args.page)
+    print(
+        f"Page identity OK: expected={args.page} "
+        f"predicted={identity.predicted_page} "
+        f"confidence={identity.confidence}"
+    )
 
     map_path = args.map_path or default_map_path(args.page)
     if not map_path.exists():
