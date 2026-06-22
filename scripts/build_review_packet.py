@@ -127,6 +127,7 @@ def main() -> int:
 
     review_dir = REVIEW_PACKET_ROOT / packet_id
     human_review_queue_csv = review_dir / "human_review_queue.csv"
+    reviewer_copy_csv = review_dir / "human_review_queue_FOR_REVIEW.csv"
     copied_machine_accepted_csv = review_dir / "page1_machine_accepted.csv"
     copied_checkbox_summary_csv = review_dir / "checkbox_review_summary.csv"
     reviewed_packet_json = review_dir / "reviewed_packet.json"
@@ -214,6 +215,18 @@ def main() -> int:
         ],
     )
 
+    run_step(
+        "Create reviewer-facing review CSV",
+        [
+            sys.executable,
+            "scripts/create_review_csv_copy.py",
+            "--input-csv",
+            str(human_review_queue_csv),
+         "--output-csv",
+            str(reviewer_copy_csv),
+        ],
+    )
+
     copy_review_artifacts(packet_id)
 
     run_step(
@@ -251,6 +264,7 @@ def main() -> int:
     print()
     print("=== Review packet complete ===")
     print(f"Human review queue: {human_review_queue_csv}")
+    print(f"Reviewer-facing review CSV: {reviewer_copy_csv}")
     print(f"Reviewed packet JSON: {reviewed_packet_json}")
     print(f"Reviewed packet values CSV: {reviewed_packet_values_csv}")
     print(f"Admissions export row CSV: {admissions_export_row_csv}")
