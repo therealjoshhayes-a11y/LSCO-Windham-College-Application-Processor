@@ -20,6 +20,7 @@ DEFAULT_REVIEW_PACKET_DIR = (
 
 DEFAULT_HUMAN_REVIEW_QUEUE_CSV = DEFAULT_REVIEW_PACKET_DIR / "human_review_queue.csv"
 DEFAULT_MACHINE_ACCEPTED_CSV = DEFAULT_REVIEW_PACKET_DIR / "page1_machine_accepted.csv"
+DEFAULT_CHECKBOX_SUMMARY_CSV = DEFAULT_REVIEW_PACKET_DIR / "checkbox_review_summary.csv"
 DEFAULT_OUTPUT_JSON = DEFAULT_REVIEW_PACKET_DIR / "reviewed_packet.json"
 DEFAULT_OUTPUT_CSV = DEFAULT_REVIEW_PACKET_DIR / "reviewed_packet_values.csv"
 
@@ -63,12 +64,55 @@ def clean(value: str | None) -> str:
     return str(value or "").strip()
 
 
+def first_present(row: dict[str, str], names: list[str]) -> str:
+    for name in names:
+        value = clean(row.get(name))
+        if value:
+            return value
+    return ""
+
+
 def machine_value_from_accepted(row: dict[str, str]) -> str:
     return clean(row.get("normalized_text"))
 
 
 def machine_value_from_review(row: dict[str, str]) -> str:
     return clean(row.get("machine_value"))
+
+
+def machine_value_from_checkbox(row: dict[str, str]) -> str:
+    return first_present(
+        row,
+        [
+            "machine_value",
+            "selected",
+            "selected_value",
+            "suggested_selected",
+            "value",
+            "normalized_text",
+        ],
+    )
+
+
+def field_id_from_checkbox(row: dict[str, str]) -> str:
+    return first_present(row, ["field_id", "group_id", "id"])
+
+
+def status_from_checkbox(row: dict[str, str]) -> str:
+    return first_present(row, ["status", "group_status"])
+
+
+def notes_from_checkbox(row: dict[str, str]) -> str:
+    return first_present(
+        row,
+        [
+            "notes",
+            "reason",
+            "message",
+            "validation_message",
+            "review_reason",
+        ],
+    )
 
 
 def build_machine_rows(
@@ -96,6 +140,34 @@ def build_machine_rows(
         }
 
     return values
+
+
+def apply_checkbox_accepted_rows(
+    packet_id: str,
+    values: dict[str, dict[str, str]],
+    checkbox_rows: list[dict[str, str]],
+) -> None:
+    for row in checkbox_rows:
+        status = status_from_checkbox(row)
+        if status != "valid":
+            continue
+
+        field_id = field_id_from_checkbox(row)
+        if not field_id:
+            continue
+
+        final_value = machine_value_from_checkbox(row)
+
+        values[field_id] = {
+            "packet_id": packet_id,
+            "field_id": field_id,
+            "source": "checkbox_accepted",
+            "final_value": final_value,
+            "machine_value": final_value,
+            "review_value": "",
+            "status": status,
+            "notes": notes_from_checkbox(row),
+        }
 
 
 def apply_review_rows(
@@ -171,7 +243,7 @@ def build_payload(packet_id: str, rows: list[dict[str, str]]) -> dict:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Build reviewed packet values from machine accepted and human review queue CSVs."
+        description="Build reviewed packet values from machine accepted, checkbox accepted, and human review queue CSVs."
     )
 
     parser.add_argument(
@@ -190,6 +262,12 @@ def parse_args() -> argparse.Namespace:
         "--machine-accepted-csv",
         default=str(DEFAULT_MACHINE_ACCEPTED_CSV),
         help="Input page1_machine_accepted.csv.",
+    )
+
+    parser.add_argument(
+        "--checkbox-summary-csv",
+        default=str(DEFAULT_CHECKBOX_SUMMARY_CSV),
+        help="Input checkbox_review_summary.csv.",
     )
 
     parser.add_argument(
@@ -213,13 +291,16 @@ def main() -> int:
     packet_id = str(args.packet_id)
     human_review_csv = Path(args.human_review_csv).resolve()
     machine_accepted_csv = Path(args.machine_accepted_csv).resolve()
+    checkbox_summary_csv = Path(args.checkbox_summary_csv).resolve()
     output_json = Path(args.output_json).resolve()
     output_csv = Path(args.output_csv).resolve()
 
     machine_rows = read_csv(machine_accepted_csv)
+    checkbox_rows = read_csv(checkbox_summary_csv)
     review_rows = read_csv(human_review_csv)
 
     values = build_machine_rows(packet_id, machine_rows)
+    apply_checkbox_accepted_rows(packet_id, values, checkbox_rows)
     apply_review_rows(packet_id, values, review_rows)
 
     final_rows = sorted(
@@ -235,12 +316,24 @@ def main() -> int:
     print(f"Packet id: {packet_id}")
     print(f"Read machine accepted CSV: {machine_accepted_csv}")
     print(f"Machine accepted rows: {len(machine_rows)}")
+    print(f"Read checkbox summary CSV: {checkbox_summary_csv}")
+    print(f"Checkbox source rows: {len(checkbox_rows)}")
     print(f"Read human review CSV: {human_review_csv}")
     print(f"Human review rows: {len(review_rows)}")
     print(f"Wrote reviewed values CSV: {output_csv}")
     print(f"Wrote reviewed packet JSON: {output_json}")
     print(f"Reviewed packet status: {payload['status']}")
     print(f"Pending review fields: {payload['pending_review_count']}")
+
+    source_counts: dict[str, int] = {}
+    for row in final_rows:
+        source = row.get("source", "")
+        source_counts[source] = source_counts.get(source, 0) + 1
+
+    print()
+    print("Source counts:")
+    for source, count in sorted(source_counts.items()):
+        print(f"  {source}: {count}")
 
     return 0
 

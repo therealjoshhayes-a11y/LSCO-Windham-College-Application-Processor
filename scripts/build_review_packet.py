@@ -127,9 +127,10 @@ def main() -> int:
 
     review_dir = REVIEW_PACKET_ROOT / packet_id
     human_review_queue_csv = review_dir / "human_review_queue.csv"
+    copied_machine_accepted_csv = review_dir / "page1_machine_accepted.csv"
+    copied_checkbox_summary_csv = review_dir / "checkbox_review_summary.csv"
     reviewed_packet_json = review_dir / "reviewed_packet.json"
     reviewed_packet_values_csv = review_dir / "reviewed_packet_values.csv"
-    copied_machine_accepted_csv = review_dir / "page1_machine_accepted.csv"
 
     print(f"Packet path: {packet_path}")
     print(f"Packet id: {packet_id}")
@@ -225,6 +226,8 @@ def main() -> int:
             str(human_review_queue_csv),
             "--machine-accepted-csv",
             str(copied_machine_accepted_csv),
+            "--checkbox-summary-csv",
+            str(copied_checkbox_summary_csv),
             "--output-json",
             str(reviewed_packet_json),
             "--output-csv",
@@ -238,6 +241,7 @@ def main() -> int:
     print(f"Reviewed packet JSON: {reviewed_packet_json}")
     print(f"Reviewed packet values CSV: {reviewed_packet_values_csv}")
     print(f"Machine accepted Page 1 values: {copied_machine_accepted_csv}")
+    print(f"Checkbox summary CSV: {copied_checkbox_summary_csv}")
     print(f"Packet OCR artifacts: {ocr_dir}")
 
     return 0
