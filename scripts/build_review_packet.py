@@ -131,6 +131,7 @@ def main() -> int:
     copied_checkbox_summary_csv = review_dir / "checkbox_review_summary.csv"
     reviewed_packet_json = review_dir / "reviewed_packet.json"
     reviewed_packet_values_csv = review_dir / "reviewed_packet_values.csv"
+    admissions_export_row_csv = review_dir / "admissions_export_row.csv"
 
     print(f"Packet path: {packet_path}")
     print(f"Packet id: {packet_id}")
@@ -235,11 +236,24 @@ def main() -> int:
         ],
     )
 
+    run_step(
+        "Export draft admissions row",
+        [
+            sys.executable,
+            "scripts/export_admissions_row.py",
+            "--reviewed-packet-json",
+            str(reviewed_packet_json),
+            "--output-csv",
+            str(admissions_export_row_csv),
+        ],
+    )
+
     print()
     print("=== Review packet complete ===")
     print(f"Human review queue: {human_review_queue_csv}")
     print(f"Reviewed packet JSON: {reviewed_packet_json}")
     print(f"Reviewed packet values CSV: {reviewed_packet_values_csv}")
+    print(f"Admissions export row CSV: {admissions_export_row_csv}")
     print(f"Machine accepted Page 1 values: {copied_machine_accepted_csv}")
     print(f"Checkbox summary CSV: {copied_checkbox_summary_csv}")
     print(f"Packet OCR artifacts: {ocr_dir}")
