@@ -18,6 +18,7 @@ from lsco_tdcj_intake.normalization.identifiers import normalize_ssn
 from lsco_tdcj_intake.normalization.names import normalize_name
 from lsco_tdcj_intake.ocr.tesseract_engine import ocr_image
 from lsco_tdcj_intake.ocr.profiles import get_profile_for_page1_field
+from lsco_tdcj_intake.imaging.blank_detection import detect_blank_bgr
 
 
 DEFAULT_OUTPUT_ROOT = Path("data/working/ocr_debug/page1_ocr")
@@ -354,6 +355,7 @@ def run_page1_ocr(warped_page_path: Path, output_root: Path) -> dict[str, Any]:
             )
             _save_crop(crop_result, crop_path)
             crop_image = _crop_image_from_result(crop_result)
+            blank_result = detect_blank_bgr(crop_image)
         except Exception as exc:
             rows.append(
                 {
@@ -370,12 +372,26 @@ def run_page1_ocr(warped_page_path: Path, output_root: Path) -> dict[str, Any]:
             continue
 
         try:
-            ocr_payload = _ocr_field_image(crop_image, field_id)
-            raw_text = ocr_payload["raw_text"]
-            confidence = ocr_payload["confidence"]
-            normalized_text, normalization = _normalize_field(field_id, raw_text)
-            status, validation_note = _status_for_field(field_id, normalized_text, confidence)
-            notes = validation_note
+            profile = get_profile_for_page1_field(field_id)
+
+            if blank_result.is_blank:
+                raw_text = ""
+                confidence = ""
+                normalized_text = ""
+                normalization = "blank_detection"
+                if profile.review_if_blank:
+                    status = "blank_or_needs_review"
+                    notes = f"Blank detected; dark_pixel_ratio={blank_result.dark_pixel_ratio}."
+                else:
+                    status = "blank_accepted"
+                    notes = f"Optional blank accepted; dark_pixel_ratio={blank_result.dark_pixel_ratio}."
+            else:
+                ocr_payload = _ocr_field_image(crop_image, field_id)
+                raw_text = ocr_payload["raw_text"]
+                confidence = ocr_payload["confidence"]
+                normalized_text, normalization = _normalize_field(field_id, raw_text)
+                status, validation_note = _status_for_field(field_id, normalized_text, confidence)
+                notes = validation_note
         except Exception as exc:
             raw_text = ""
             confidence = ""
