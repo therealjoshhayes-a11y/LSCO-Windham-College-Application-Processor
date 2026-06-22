@@ -68,6 +68,25 @@ ADMISSIONS_HEADERS = [
     "First Gen",
 ]
 
+TERM_LABELS = {
+    "fall": "Fall",
+    "spring": "Spring",
+    "summer": "Summer",
+}
+
+STUDENT_TYPE_LABELS = {
+    "first_time": "First Time",
+    "returning": "Returning",
+    "transfer": "Transfer",
+}
+
+ADMISSION_TYPE_LABELS = {
+    "assoc_deg": "Associate Degree",
+    "certificate": "Certificate",
+    "enrichment": "Enrichment",
+    "transfer": "Transfer",
+    "skills_employ": "Skills/Employment",
+}
 
 def load_reviewed_packet(path: Path) -> dict:
     if not path.exists():
@@ -89,8 +108,14 @@ def checkbox_selected(packet: dict, field_id: str, output_value: str = "Yes") ->
 
 
 def start_term(packet: dict) -> str:
-    term = field_value(packet, "p1_term_fall") or field_value(packet, "p1_term_spring") or field_value(packet, "p1_term_summer")
+    raw_term = (
+        field_value(packet, "p1_term_fall")
+        or field_value(packet, "p1_term_spring")
+        or field_value(packet, "p1_term_summer")
+    )
     year = field_value(packet, "p1_year")
+
+    term = TERM_LABELS.get(raw_term.lower(), raw_term)
 
     if term and year:
         return f"{term} {year}"
@@ -103,28 +128,27 @@ def start_term(packet: dict) -> str:
 
     return ""
 
-
 def student_type(packet: dict) -> str:
     if field_value(packet, "p1_student_type_first_time"):
-        return "First Time"
+        return STUDENT_TYPE_LABELS["first_time"]
     if field_value(packet, "p1_student_type_returning"):
-        return "Returning"
+        return STUDENT_TYPE_LABELS["returning"]
     if field_value(packet, "p1_student_type_transfer"):
-        return "Transfer"
+        return STUDENT_TYPE_LABELS["transfer"]
     return ""
 
 
 def admission_type(packet: dict) -> str:
     if field_value(packet, "p1_intent_assoc_deg"):
-        return "Assoc. Deg."
+        return ADMISSION_TYPE_LABELS["assoc_deg"]
     if field_value(packet, "p1_intent_certificate"):
-        return "Certificate"
+        return ADMISSION_TYPE_LABELS["certificate"]
     if field_value(packet, "p1_intent_enrichment"):
-        return "Enrichment"
+        return ADMISSION_TYPE_LABELS["enrichment"]
     if field_value(packet, "p1_intent_transfer"):
-        return "Transfer"
+        return ADMISSION_TYPE_LABELS["transfer"]
     if field_value(packet, "p1_intent_skills_employ"):
-        return "Skills/Employ."
+        return ADMISSION_TYPE_LABELS["skills_employ"]
     return ""
 
 
