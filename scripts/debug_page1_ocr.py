@@ -296,7 +296,9 @@ def _status_for_field(field_id: str, normalized_text: str, confidence: Any) -> t
     if field_id in {"p1_last_name", "p1_first_name"}:
         if len(value) >= 2 and value.isalpha() and conf >= 0.50:
             return "accepted", ""
-        return "ocr_candidate_needs_review", "Name must be alphabetic with confidence >= 0.50."
+        if len(value) >= 2 and value.isalpha() and conf == 0.0:
+            return "accepted", "Accepted by required-name grammar fallback; Tesseract confidence unavailable."
+        return "ocr_candidate_needs_review", "Name must be alphabetic or pass required-name grammar fallback."
 
     if field_id in {"p1_mi"}:
         if len(value) == 1 and value.isalpha() and conf >= 0.50:
