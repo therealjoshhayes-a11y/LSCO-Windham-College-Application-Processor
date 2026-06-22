@@ -151,11 +151,24 @@ def _ocr_field_image(image: Any, field_id: str) -> dict[str, Any]:
     profile = get_profile_for_page1_field(field_id)
 
     try:
+        if profile.profile_id == "single_letter_review":
+            threshold_mode = "fixed_180"
+            psm = 10
+            apply_blur = False
+        else:
+            threshold_mode = "otsu"
+            psm = 7
+            apply_blur = True
+
         result = ocr_image(
             image,
             field_id=field_id,
             allowlist=profile.allowlist,
+            threshold_mode=threshold_mode,
+            apply_blur=apply_blur,
+            psm=psm,
         )
+
     except TypeError:
         result = ocr_image(image)
 

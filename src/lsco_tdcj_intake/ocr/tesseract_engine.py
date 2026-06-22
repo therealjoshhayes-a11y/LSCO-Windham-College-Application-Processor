@@ -47,6 +47,8 @@ def prepare_for_tesseract(
     image: Any,
     *,
     drop_form_color: bool = True,
+    threshold_mode: str = "otsu",
+    apply_blur: bool = True,
 ) -> np.ndarray:
     gray = _to_gray(image, drop_form_color=drop_form_color)
 
@@ -60,7 +62,19 @@ def prepare_for_tesseract(
             interpolation=cv2.INTER_CUBIC,
         )
 
-    gray = cv2.GaussianBlur(gray, (3, 3), 0)
+    if apply_blur:
+        gray = cv2.GaussianBlur(gray, (3, 3), 0)
+
+    if threshold_mode == "fixed_180":
+        _, thresh = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY)
+        return thresh
+
+    if threshold_mode == "fixed_200":
+        _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
+        return thresh
+
+    if threshold_mode != "otsu":
+        raise ValueError(f"Unsupported threshold_mode: {threshold_mode!r}")
 
     _, thresh = cv2.threshold(
         gray,
@@ -103,6 +117,8 @@ def ocr_image(
     allowlist: str | None = None,
     field_id: str | None = None,
     drop_form_color: bool = True,
+    threshold_mode: str = "otsu",
+    apply_blur: bool = True,
 ) -> OCRResult:
     """
     Run local Tesseract OCR on a cropped field image.
@@ -111,9 +127,12 @@ def ocr_image(
     decisions should live outside this low-level engine.
     """
     prepared = prepare_for_tesseract(
-    image,
-    drop_form_color=drop_form_color,
-)
+        image,
+        drop_form_color=drop_form_color,
+        threshold_mode=threshold_mode,
+        apply_blur=apply_blur,
+    )
+
     config_parts = [
         "--oem 3",
         f"--psm {psm}",
