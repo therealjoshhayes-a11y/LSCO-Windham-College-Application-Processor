@@ -17,7 +17,8 @@ DEFAULT_PACKET_PATH = (
 )
 
 CHECKBOX_ROOT = PROJECT_ROOT / "data" / "processed" / "checkboxes"
-OCR_ROOT = PROJECT_ROOT / "data" / "working" / "ocr_debug" / "page1_ocr"
+SHARED_OCR_ROOT = PROJECT_ROOT / "data" / "working" / "ocr_debug" / "page1_ocr"
+PACKET_OCR_PARENT = PROJECT_ROOT / "data" / "working" / "ocr_debug"
 REVIEW_PACKET_ROOT = PROJECT_ROOT / "data" / "processed" / "review_packets"
 
 
@@ -50,11 +51,16 @@ def copy_if_exists(source: Path, destination: Path) -> None:
     print(f"Copied: {source} -> {destination}")
 
 
+def packet_ocr_root(packet_id: str) -> Path:
+    return PACKET_OCR_PARENT / packet_id / "page1_ocr"
+
+
 def copy_review_artifacts(packet_id: str) -> None:
     review_dir = REVIEW_PACKET_ROOT / packet_id
     review_dir.mkdir(parents=True, exist_ok=True)
 
     checkbox_dir = CHECKBOX_ROOT / packet_id
+    ocr_dir = packet_ocr_root(packet_id)
 
     artifacts = [
         (
@@ -70,27 +76,27 @@ def copy_review_artifacts(packet_id: str) -> None:
             review_dir / "checkbox_review_summary.json",
         ),
         (
-            OCR_ROOT / "page1_ocr.csv",
+            SHARED_OCR_ROOT / "page1_ocr.csv",
             review_dir / "page1_ocr.csv",
         ),
         (
-            OCR_ROOT / "page1_ocr.json",
+            SHARED_OCR_ROOT / "page1_ocr.json",
             review_dir / "page1_ocr.json",
         ),
         (
-            OCR_ROOT / "page1_review_queue.csv",
+            ocr_dir / "page1_review_queue.csv",
             review_dir / "page1_ocr_review_queue.csv",
         ),
         (
-            OCR_ROOT / "page1_machine_accepted.csv",
+            ocr_dir / "page1_machine_accepted.csv",
             review_dir / "page1_machine_accepted.csv",
         ),
         (
-            OCR_ROOT / "numeric_fullfield" / "page1_numeric_fullfield_ocr.csv",
+            ocr_dir / "numeric_fullfield" / "page1_numeric_fullfield_ocr.csv",
             review_dir / "page1_numeric_fullfield_ocr.csv",
         ),
         (
-            OCR_ROOT / "numeric_fullfield" / "page1_numeric_fullfield_ocr.json",
+            ocr_dir / "numeric_fullfield" / "page1_numeric_fullfield_ocr.json",
             review_dir / "page1_numeric_fullfield_ocr.json",
         ),
     ]
@@ -109,10 +115,23 @@ def main() -> int:
         return 1
 
     packet_id = packet_id_from_path(packet_path)
-    warped_page_1 = CHECKBOX_ROOT / packet_id / "warped" / "warped_page_1.png"
+
+    checkbox_dir = CHECKBOX_ROOT / packet_id
+    checkbox_review_csv = checkbox_dir / "review_summary.csv"
+    warped_page_1 = checkbox_dir / "warped" / "warped_page_1.png"
+
+    ocr_dir = packet_ocr_root(packet_id)
+    numeric_dir = ocr_dir / "numeric_fullfield"
+    page1_review_queue_csv = ocr_dir / "page1_review_queue.csv"
+    page1_machine_accepted_csv = ocr_dir / "page1_machine_accepted.csv"
+
+    review_dir = REVIEW_PACKET_ROOT / packet_id
+    human_review_queue_csv = review_dir / "human_review_queue.csv"
 
     print(f"Packet path: {packet_path}")
     print(f"Packet id: {packet_id}")
+    print(f"Packet OCR dir: {ocr_dir}")
+    print(f"Review packet dir: {review_dir}")
 
     run_step(
         "Process packet checkboxes",
@@ -141,6 +160,10 @@ def main() -> int:
         [
             sys.executable,
             "scripts/debug_page1_numeric_fullfield_ocr.py",
+            "--crops-dir",
+            str(SHARED_OCR_ROOT / "crops"),
+            "--output-dir",
+            str(numeric_dir),
         ],
     )
 
@@ -149,6 +172,12 @@ def main() -> int:
         [
             sys.executable,
             "scripts/export_page1_ocr_review_queue.py",
+            "--ocr-csv",
+            str(SHARED_OCR_ROOT / "page1_ocr.csv"),
+            "--numeric-fullfield-csv",
+            str(numeric_dir / "page1_numeric_fullfield_ocr.csv"),
+            "--output-csv",
+            str(page1_review_queue_csv),
         ],
     )
 
@@ -157,6 +186,10 @@ def main() -> int:
         [
             sys.executable,
             "scripts/export_page1_machine_accepted.py",
+            "--ocr-csv",
+            str(SHARED_OCR_ROOT / "page1_ocr.csv"),
+            "--output-csv",
+            str(page1_machine_accepted_csv),
         ],
     )
 
@@ -165,18 +198,24 @@ def main() -> int:
         [
             sys.executable,
             "scripts/merge_page1_review_with_checkbox_review.py",
+            "--packet-id",
+            packet_id,
+            "--checkbox-review-csv",
+            str(checkbox_review_csv),
+            "--ocr-review-csv",
+            str(page1_review_queue_csv),
+            "--output-csv",
+            str(human_review_queue_csv),
         ],
     )
 
     copy_review_artifacts(packet_id)
 
-    final_queue = REVIEW_PACKET_ROOT / packet_id / "human_review_queue.csv"
-    machine_accepted = REVIEW_PACKET_ROOT / packet_id / "page1_machine_accepted.csv"
-
     print()
     print("=== Review packet complete ===")
-    print(f"Human review queue: {final_queue}")
-    print(f"Machine accepted Page 1 values: {machine_accepted}")
+    print(f"Human review queue: {human_review_queue_csv}")
+    print(f"Machine accepted Page 1 values: {page1_machine_accepted_csv}")
+    print(f"Packet OCR artifacts: {ocr_dir}")
 
     return 0
 

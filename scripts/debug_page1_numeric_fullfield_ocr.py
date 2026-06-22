@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import re
-import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -14,21 +14,39 @@ import pytesseract
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-DEFAULT_CROPS_DIR = PROJECT_ROOT / "data" / "working" / "ocr_debug" / "page1_ocr" / "crops"
-DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "working" / "ocr_debug" / "page1_ocr" / "numeric_fullfield"
+DEFAULT_CROPS_DIR = (
+    PROJECT_ROOT
+    / "data"
+    / "working"
+    / "ocr_debug"
+    / "page1_ocr"
+    / "crops"
+)
+
+DEFAULT_OUTPUT_DIR = (
+    PROJECT_ROOT
+    / "data"
+    / "working"
+    / "ocr_debug"
+    / "page1_ocr"
+    / "numeric_fullfield"
+)
 
 TARGET_FIELDS = {
     "p1_tdcj_number": {
-        "expected_digits": 7,
-        "note": "TDCJ number full boxed-field numeric OCR; review required.",
+        "min_digits": 8,
+        "max_digits": 8,
+        "note": "TDCJ number full boxed-field numeric OCR; exactly 8 digits expected; review required.",
     },
     "p1_ssn": {
-        "expected_digits": 9,
-        "note": "SSN full boxed-field numeric OCR; review required.",
+        "min_digits": 9,
+        "max_digits": 9,
+        "note": "SSN full boxed-field numeric OCR; exactly 9 digits expected; review required.",
     },
     "p1_date_of_birth": {
-        "expected_digits": 8,
-        "note": "DOB full boxed-field numeric OCR as MMDDYYYY digits; review required.",
+        "min_digits": 8,
+        "max_digits": 8,
+        "note": "DOB full boxed-field numeric OCR as MMDDYYYY digits; exactly 8 digits expected; review required.",
     },
 }
 
@@ -40,8 +58,9 @@ class NumericFullFieldResult:
     best_digits: str
     best_raw_text: str
     best_variant: str
-    expected_digits: int
-    length_matches: bool
+    min_digits: int
+    max_digits: int
+    shape_valid: bool
     all_candidates: str
     source_crop_path: str
     processed_image_path: str
@@ -66,15 +85,8 @@ def find_crop(crops_dir: Path, field_id: str) -> Path:
 
 
 def drop_green_lines(bgr: np.ndarray) -> np.ndarray:
-    """
-    Remove green form scaffold while preserving dark handwriting.
-
-    This is intentionally local/fallback logic for a diagnostic script.
-    It does not replace src\\lsco_tdcj_intake\\imaging\\drop_color.py.
-    """
     hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
 
-    # Broad green range; tuned to remove form lines, not black handwriting.
     lower_green = np.array([35, 25, 25])
     upper_green = np.array([95, 255, 255])
     green_mask = cv2.inRange(hsv, lower_green, upper_green)
@@ -101,7 +113,6 @@ def preprocess_variants(bgr: np.ndarray) -> dict[str, np.ndarray]:
     _, fixed_200 = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
     variants["fixed_200_drop_green"] = fixed_200
 
-    # Light scale-up helps Tesseract see handwritten digits without cell segmentation.
     scaled = cv2.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_CUBIC)
     _, scaled_otsu = cv2.threshold(scaled, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     variants["scaled_otsu_drop_green"] = scaled_otsu
@@ -119,28 +130,30 @@ def run_tesseract_numeric(image: np.ndarray) -> str:
     return pytesseract.image_to_string(image, config=config).strip()
 
 
+def shape_valid(digits: str, min_digits: int, max_digits: int) -> bool:
+    return min_digits <= len(digits) <= max_digits
+
+
 def choose_best_candidate(
     candidates: list[tuple[str, str, str]],
-    expected_digits: int,
+    min_digits: int,
+    max_digits: int,
 ) -> tuple[str, str, str]:
-    """
-    Choose best candidate for review evidence only.
+    valid_shape = [
+        item for item in candidates
+        if shape_valid(item[2], min_digits, max_digits)
+    ]
 
-    Preference:
-    1. Candidate with expected digit length.
-    2. Otherwise longest digit string.
-    3. Stable deterministic variant order.
-    """
-    exact = [item for item in candidates if len(item[2]) == expected_digits]
-    if exact:
-        return exact[0]
+    if valid_shape:
+        return valid_shape[0]
 
     return max(candidates, key=lambda item: len(item[2]))
 
 
 def process_field(crops_dir: Path, output_dir: Path, field_id: str) -> NumericFullFieldResult:
     meta = TARGET_FIELDS[field_id]
-    expected_digits = int(meta["expected_digits"])
+    min_digits = int(meta["min_digits"])
+    max_digits = int(meta["max_digits"])
 
     crop_path = find_crop(crops_dir, field_id)
     bgr = cv2.imread(str(crop_path))
@@ -156,7 +169,8 @@ def process_field(crops_dir: Path, output_dir: Path, field_id: str) -> NumericFu
 
     best_variant, best_raw_text, best_digits = choose_best_candidate(
         candidate_rows,
-        expected_digits,
+        min_digits,
+        max_digits,
     )
 
     processed_path = output_dir / f"{field_id}__{best_variant}.png"
@@ -167,16 +181,15 @@ def process_field(crops_dir: Path, output_dir: Path, field_id: str) -> NumericFu
         for variant, raw, digits in candidate_rows
     )
 
-    length_matches = len(best_digits) == expected_digits
-
     return NumericFullFieldResult(
         field_id=field_id,
         status="ocr_candidate_needs_review",
         best_digits=best_digits,
         best_raw_text=best_raw_text,
         best_variant=best_variant,
-        expected_digits=expected_digits,
-        length_matches=length_matches,
+        min_digits=min_digits,
+        max_digits=max_digits,
+        shape_valid=shape_valid(best_digits, min_digits, max_digits),
         all_candidates=all_candidates,
         source_crop_path=str(crop_path),
         processed_image_path=str(processed_path),
@@ -204,16 +217,35 @@ def write_outputs(results: list[NumericFullFieldResult], output_dir: Path) -> No
     print(f"Wrote JSON: {json_path}")
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run full-field numeric OCR evidence for Page 1 identity fields."
+    )
+
+    parser.add_argument(
+        "--crops-dir",
+        default=str(DEFAULT_CROPS_DIR),
+        help="Input Page 1 OCR crop folder.",
+    )
+
+    parser.add_argument(
+        "--output-dir",
+        default=str(DEFAULT_OUTPUT_DIR),
+        help="Output folder for numeric full-field OCR evidence.",
+    )
+
+    return parser.parse_args()
+
+
 def main() -> int:
-    crops_dir = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else DEFAULT_CROPS_DIR
-    output_dir = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else DEFAULT_OUTPUT_DIR
+    args = parse_args()
+
+    crops_dir = Path(args.crops_dir).resolve()
+    output_dir = Path(args.output_dir).resolve()
 
     if not crops_dir.exists():
-        print(f"Crop folder not found: {crops_dir}", file=sys.stderr)
-        print(
-            "Run scripts\\debug_page1_ocr.py first so the Page 1 crop images exist.",
-            file=sys.stderr,
-        )
+        print(f"Crop folder not found: {crops_dir}")
+        print("Run scripts\\debug_page1_ocr.py first so the Page 1 crop images exist.")
         return 1
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -231,7 +263,7 @@ def main() -> int:
         print(
             f"{result.field_id}: digits={result.best_digits!r} "
             f"variant={result.best_variant} "
-            f"length_matches={result.length_matches}"
+            f"shape_valid={result.shape_valid}"
         )
 
     print()

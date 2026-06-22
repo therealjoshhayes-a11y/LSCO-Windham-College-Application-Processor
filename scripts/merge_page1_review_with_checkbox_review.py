@@ -1,23 +1,24 @@
 from __future__ import annotations
 
+import argparse
 import csv
 from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-PACKET_ID = "image-1"
+DEFAULT_PACKET_ID = "image-1"
 
-CHECKBOX_REVIEW_CSV = (
+DEFAULT_CHECKBOX_REVIEW_CSV = (
     PROJECT_ROOT
     / "data"
     / "processed"
     / "checkboxes"
-    / PACKET_ID
+    / DEFAULT_PACKET_ID
     / "review_summary.csv"
 )
 
-OCR_REVIEW_CSV = (
+DEFAULT_OCR_REVIEW_CSV = (
     PROJECT_ROOT
     / "data"
     / "working"
@@ -26,12 +27,12 @@ OCR_REVIEW_CSV = (
     / "page1_review_queue.csv"
 )
 
-OUTPUT_CSV = (
+DEFAULT_OUTPUT_CSV = (
     PROJECT_ROOT
     / "data"
     / "processed"
     / "review_packets"
-    / PACKET_ID
+    / DEFAULT_PACKET_ID
     / "human_review_queue.csv"
 )
 
@@ -107,7 +108,7 @@ def review_sort_key(row: dict[str, str]) -> tuple[int, str, str]:
     return (order, row.get("review_source", ""), field_id)
 
 
-def normalize_checkbox_row(row: dict[str, str]) -> dict[str, str]:
+def normalize_checkbox_row(row: dict[str, str], packet_id: str) -> dict[str, str]:
     field_id = first_present(row, ["field_id", "group_id", "id"])
     status = first_present(row, ["status", "group_status"])
 
@@ -145,7 +146,7 @@ def normalize_checkbox_row(row: dict[str, str]) -> dict[str, str]:
     )
 
     return {
-        "packet_id": PACKET_ID,
+        "packet_id": packet_id,
         "review_source": "checkbox",
         "page": first_present(row, ["page", "page_number"]),
         "field_id": field_id,
@@ -173,7 +174,7 @@ def normalize_checkbox_row(row: dict[str, str]) -> dict[str, str]:
     }
 
 
-def normalize_ocr_row(row: dict[str, str]) -> dict[str, str]:
+def normalize_ocr_row(row: dict[str, str], packet_id: str) -> dict[str, str]:
     field_id = row.get("field_id", "")
     numeric_candidate = row.get("numeric_fullfield_candidate", "")
 
@@ -198,7 +199,7 @@ def normalize_ocr_row(row: dict[str, str]) -> dict[str, str]:
         )
 
     return {
-        "packet_id": PACKET_ID,
+        "packet_id": packet_id,
         "review_source": "ocr_page1",
         "page": "1",
         "field_id": field_id,
@@ -260,9 +261,48 @@ def write_csv(rows: list[dict[str, str]], path: Path) -> None:
         writer.writerows(rows)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Merge checkbox review rows and Page 1 OCR review rows into one human review queue."
+    )
+
+    parser.add_argument(
+        "--packet-id",
+        default=DEFAULT_PACKET_ID,
+        help="Packet id to write into the merged review queue.",
+    )
+
+    parser.add_argument(
+        "--checkbox-review-csv",
+        default=str(DEFAULT_CHECKBOX_REVIEW_CSV),
+        help="Input checkbox review_summary.csv.",
+    )
+
+    parser.add_argument(
+        "--ocr-review-csv",
+        default=str(DEFAULT_OCR_REVIEW_CSV),
+        help="Input Page 1 OCR review queue CSV.",
+    )
+
+    parser.add_argument(
+        "--output-csv",
+        default=str(DEFAULT_OUTPUT_CSV),
+        help="Output merged human review queue CSV.",
+    )
+
+    return parser.parse_args()
+
+
 def main() -> int:
-    checkbox_source_rows = read_csv(CHECKBOX_REVIEW_CSV)
-    ocr_source_rows = read_csv(OCR_REVIEW_CSV)
+    args = parse_args()
+
+    packet_id = str(args.packet_id)
+    checkbox_review_csv = Path(args.checkbox_review_csv).resolve()
+    ocr_review_csv = Path(args.ocr_review_csv).resolve()
+    output_csv = Path(args.output_csv).resolve()
+
+    checkbox_source_rows = read_csv(checkbox_review_csv)
+    ocr_source_rows = read_csv(ocr_review_csv)
 
     checkbox_review_rows = [
         row
@@ -279,21 +319,22 @@ def main() -> int:
     normalized_rows: list[dict[str, str]] = []
 
     for row in checkbox_review_rows:
-        normalized_rows.append(normalize_checkbox_row(row))
+        normalized_rows.append(normalize_checkbox_row(row, packet_id))
 
     for row in ocr_review_rows:
-        normalized_rows.append(normalize_ocr_row(row))
+        normalized_rows.append(normalize_ocr_row(row, packet_id))
 
     final_rows = with_review_order(normalized_rows)
-    write_csv(final_rows, OUTPUT_CSV)
+    write_csv(final_rows, output_csv)
 
-    print(f"Read checkbox review CSV: {CHECKBOX_REVIEW_CSV}")
+    print(f"Packet id: {packet_id}")
+    print(f"Read checkbox review CSV: {checkbox_review_csv}")
     print(f"Checkbox source rows: {len(checkbox_source_rows)}")
     print(f"Checkbox review rows: {len(checkbox_review_rows)}")
-    print(f"Read OCR review CSV: {OCR_REVIEW_CSV}")
+    print(f"Read OCR review CSV: {ocr_review_csv}")
     print(f"OCR source rows: {len(ocr_source_rows)}")
     print(f"OCR review rows: {len(ocr_review_rows)}")
-    print(f"Wrote merged human review queue: {OUTPUT_CSV}")
+    print(f"Wrote merged human review queue: {output_csv}")
     print(f"Total human review rows: {len(final_rows)}")
 
     return 0

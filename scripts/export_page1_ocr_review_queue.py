@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import argparse
 import csv
 from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-PAGE1_OCR_CSV = (
+DEFAULT_PAGE1_OCR_CSV = (
     PROJECT_ROOT
     / "data"
     / "working"
@@ -15,7 +16,7 @@ PAGE1_OCR_CSV = (
     / "page1_ocr.csv"
 )
 
-NUMERIC_FULLFIELD_CSV = (
+DEFAULT_NUMERIC_FULLFIELD_CSV = (
     PROJECT_ROOT
     / "data"
     / "working"
@@ -25,7 +26,7 @@ NUMERIC_FULLFIELD_CSV = (
     / "page1_numeric_fullfield_ocr.csv"
 )
 
-OUTPUT_CSV = (
+DEFAULT_OUTPUT_CSV = (
     PROJECT_ROOT
     / "data"
     / "working"
@@ -74,13 +75,19 @@ def shape_note(field_id: str, digits: str) -> str:
     digit_count = len(digits)
 
     if field_id == "p1_ssn":
-        return "numeric_shape_valid=True" if digit_count == 9 else "numeric_shape_valid=False; expected exactly 9 digits"
+        if digit_count == 9:
+            return "numeric_shape_valid=True"
+        return "numeric_shape_valid=False; expected exactly 9 digits"
 
     if field_id == "p1_date_of_birth":
-        return "numeric_shape_valid=True" if digit_count == 8 else "numeric_shape_valid=False; expected exactly 8 digits"
+        if digit_count == 8:
+            return "numeric_shape_valid=True"
+        return "numeric_shape_valid=False; expected exactly 8 digits"
 
     if field_id == "p1_tdcj_number":
-        return "numeric_shape_valid=True" if 7 <= digit_count <= 10 else "numeric_shape_valid=False; expected 7 to 10 digits"
+        if digit_count == 8:
+            return "numeric_shape_valid=True"
+        return "numeric_shape_valid=False; expected exactly 8 digits"
 
     return ""
 
@@ -169,9 +176,41 @@ def write_review_queue(rows: list[dict[str, str]], path: Path) -> None:
         writer.writerows(rows)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Export Page 1 OCR fields needing human review."
+    )
+
+    parser.add_argument(
+        "--ocr-csv",
+        default=str(DEFAULT_PAGE1_OCR_CSV),
+        help="Input Page 1 OCR CSV.",
+    )
+
+    parser.add_argument(
+        "--numeric-fullfield-csv",
+        default=str(DEFAULT_NUMERIC_FULLFIELD_CSV),
+        help="Optional numeric full-field OCR evidence CSV.",
+    )
+
+    parser.add_argument(
+        "--output-csv",
+        default=str(DEFAULT_OUTPUT_CSV),
+        help="Output Page 1 OCR review queue CSV.",
+    )
+
+    return parser.parse_args()
+
+
 def main() -> int:
-    ocr_rows = read_csv_rows(PAGE1_OCR_CSV)
-    numeric_evidence = read_optional_numeric_evidence(NUMERIC_FULLFIELD_CSV)
+    args = parse_args()
+
+    ocr_csv = Path(args.ocr_csv).resolve()
+    numeric_fullfield_csv = Path(args.numeric_fullfield_csv).resolve()
+    output_csv = Path(args.output_csv).resolve()
+
+    ocr_rows = read_csv_rows(ocr_csv)
+    numeric_evidence = read_optional_numeric_evidence(numeric_fullfield_csv)
 
     review_rows = []
 
@@ -180,11 +219,16 @@ def main() -> int:
         if status in REVIEW_STATUSES:
             review_rows.append(build_review_row(row, numeric_evidence))
 
-    write_review_queue(review_rows, OUTPUT_CSV)
+    write_review_queue(review_rows, output_csv)
 
-    print(f"Read OCR CSV: {PAGE1_OCR_CSV}")
-    print(f"Read numeric evidence CSV: {NUMERIC_FULLFIELD_CSV if NUMERIC_FULLFIELD_CSV.exists() else 'not found; skipped'}")
-    print(f"Wrote review queue: {OUTPUT_CSV}")
+    print(f"Read OCR CSV: {ocr_csv}")
+
+    if numeric_fullfield_csv.exists():
+        print(f"Read numeric evidence CSV: {numeric_fullfield_csv}")
+    else:
+        print("Read numeric evidence CSV: not found; skipped")
+
+    print(f"Wrote review queue: {output_csv}")
     print(f"Review rows: {len(review_rows)}")
 
     if numeric_evidence:

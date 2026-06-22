@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import argparse
 import csv
 from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-PAGE1_OCR_CSV = (
+DEFAULT_PAGE1_OCR_CSV = (
     PROJECT_ROOT
     / "data"
     / "working"
@@ -15,7 +16,7 @@ PAGE1_OCR_CSV = (
     / "page1_ocr.csv"
 )
 
-OUTPUT_CSV = (
+DEFAULT_OUTPUT_CSV = (
     PROJECT_ROOT
     / "data"
     / "working"
@@ -82,8 +83,33 @@ def write_machine_accepted(rows: list[dict[str, str]], path: Path) -> None:
         writer.writerows(rows)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Export Page 1 OCR machine-accepted fields."
+    )
+
+    parser.add_argument(
+        "--ocr-csv",
+        default=str(DEFAULT_PAGE1_OCR_CSV),
+        help="Input Page 1 OCR CSV.",
+    )
+
+    parser.add_argument(
+        "--output-csv",
+        default=str(DEFAULT_OUTPUT_CSV),
+        help="Output machine-accepted CSV.",
+    )
+
+    return parser.parse_args()
+
+
 def main() -> int:
-    ocr_rows = read_csv_rows(PAGE1_OCR_CSV)
+    args = parse_args()
+
+    ocr_csv = Path(args.ocr_csv).resolve()
+    output_csv = Path(args.output_csv).resolve()
+
+    ocr_rows = read_csv_rows(ocr_csv)
 
     accepted_rows = [
         build_accepted_row(row)
@@ -91,10 +117,10 @@ def main() -> int:
         if row.get("status", "") in ACCEPTED_STATUSES
     ]
 
-    write_machine_accepted(accepted_rows, OUTPUT_CSV)
+    write_machine_accepted(accepted_rows, output_csv)
 
-    print(f"Read OCR CSV: {PAGE1_OCR_CSV}")
-    print(f"Wrote machine accepted CSV: {OUTPUT_CSV}")
+    print(f"Read OCR CSV: {ocr_csv}")
+    print(f"Wrote machine accepted CSV: {output_csv}")
     print(f"Accepted rows: {len(accepted_rows)}")
 
     status_counts: dict[str, int] = {}
