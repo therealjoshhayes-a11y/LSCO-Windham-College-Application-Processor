@@ -281,9 +281,7 @@ def _status_for_field(field_id: str, normalized_text: str, confidence: Any) -> t
     if field_id == "p1_tdcj_number":
         if value.isdigit() and 5 <= len(value) <= 10 and conf >= 0.60:
             return "accepted", ""
-        if value.isdigit() and 5 <= len(value) <= 10 and conf == 0.0:
-            return "accepted", "Accepted by TDCJ-number grammar fallback; Tesseract confidence unavailable."
-        return "ocr_candidate_needs_review", "TDCJ number must be 5-10 digits or pass TDCJ-number grammar fallback."
+        return "ocr_candidate_needs_review", "TDCJ number requires human review unless confidence >= 0.60."
 
     if field_id == "p1_hs_state":
         if len(value) == 2 and value.isalpha() and is_valid_state_abbrev(value) and conf >= 0.40:
