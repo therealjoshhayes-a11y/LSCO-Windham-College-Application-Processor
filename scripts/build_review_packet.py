@@ -127,6 +127,9 @@ def main() -> int:
 
     review_dir = REVIEW_PACKET_ROOT / packet_id
     human_review_queue_csv = review_dir / "human_review_queue.csv"
+    reviewed_packet_json = review_dir / "reviewed_packet.json"
+    reviewed_packet_values_csv = review_dir / "reviewed_packet_values.csv"
+    copied_machine_accepted_csv = review_dir / "page1_machine_accepted.csv"
 
     print(f"Packet path: {packet_path}")
     print(f"Packet id: {packet_id}")
@@ -211,10 +214,30 @@ def main() -> int:
 
     copy_review_artifacts(packet_id)
 
+    run_step(
+        "Build reviewed packet values",
+        [
+            sys.executable,
+            "scripts/build_reviewed_packet.py",
+            "--packet-id",
+            packet_id,
+            "--human-review-csv",
+            str(human_review_queue_csv),
+            "--machine-accepted-csv",
+            str(copied_machine_accepted_csv),
+            "--output-json",
+            str(reviewed_packet_json),
+            "--output-csv",
+            str(reviewed_packet_values_csv),
+        ],
+    )
+
     print()
     print("=== Review packet complete ===")
     print(f"Human review queue: {human_review_queue_csv}")
-    print(f"Machine accepted Page 1 values: {page1_machine_accepted_csv}")
+    print(f"Reviewed packet JSON: {reviewed_packet_json}")
+    print(f"Reviewed packet values CSV: {reviewed_packet_values_csv}")
+    print(f"Machine accepted Page 1 values: {copied_machine_accepted_csv}")
     print(f"Packet OCR artifacts: {ocr_dir}")
 
     return 0
