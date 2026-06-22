@@ -442,16 +442,24 @@ def run_page1_ocr(warped_page_path: Path, output_root: Path) -> dict[str, Any]:
         writer.writeheader()
         writer.writerows(rows)
 
-    accepted = sum(1 for row in rows if row["status"] == "accepted")
-    review = sum(1 for row in rows if row["status"] != "accepted")
+    ocr_accepted = sum(1 for row in rows if row["status"] == "accepted")
+    blank_accepted = sum(1 for row in rows if row["status"] == "blank_accepted")
+    review = sum(
+        1
+        for row in rows
+        if row["status"] not in {"accepted", "blank_accepted"}
+    )
+    failed = sum(1 for row in rows if row["status"].endswith("failed"))
 
     return {
         "json_path": str(json_path),
         "csv_path": str(csv_path),
         "crop_root": str(crops_root),
         "field_count": len(rows),
-        "accepted": accepted,
-        "review_or_failed": review,
+        "ocr_accepted": ocr_accepted,
+        "blank_accepted": blank_accepted,
+        "review_needed": review,
+        "failed": failed,
     }
 
 
@@ -480,8 +488,10 @@ def main() -> int:
 
     print("Page 1 OCR debug complete")
     print(f"Fields processed: {summary['field_count']}")
-    print(f"Accepted: {summary['accepted']}")
-    print(f"Review/failed: {summary['review_or_failed']}")
+    print(f"OCR accepted: {summary['ocr_accepted']}")
+    print(f"Blank accepted: {summary['blank_accepted']}")
+    print(f"Review needed: {summary['review_needed']}")
+    print(f"Failed: {summary['failed']}")
     print(f"CSV: {summary['csv_path']}")
     print(f"JSON: {summary['json_path']}")
     print(f"Crops: {summary['crop_root']}")
