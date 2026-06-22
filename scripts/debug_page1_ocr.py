@@ -17,6 +17,7 @@ from lsco_tdcj_intake.normalization.education import normalize_state_abbrev, is_
 from lsco_tdcj_intake.normalization.identifiers import normalize_ssn
 from lsco_tdcj_intake.normalization.names import normalize_name
 from lsco_tdcj_intake.ocr.tesseract_engine import ocr_image
+from lsco_tdcj_intake.ocr.profiles import get_profile_for_page1_field
 
 
 DEFAULT_OUTPUT_ROOT = Path("data/working/ocr_debug/page1_ocr")
@@ -146,18 +147,22 @@ def _crop_image_from_result(crop_result: Any) -> Any:
 
 
 def _ocr_field_image(image: Any, field_id: str) -> dict[str, Any]:
+    profile = get_profile_for_page1_field(field_id)
+
     try:
-        result = ocr_image(image, field_id=field_id)
+        result = ocr_image(
+            image,
+            field_id=field_id,
+            allowlist=profile.allowlist,
+        )
     except TypeError:
-        try:
-            result = ocr_image(image)
-        except TypeError:
-            result = ocr_image(image=image)
+        result = ocr_image(image)
 
     if isinstance(result, str):
         return {
             "raw_text": result,
             "confidence": None,
+            "profile_id": profile.profile_id,
             "engine_result": {"text": result},
         }
 
@@ -172,6 +177,7 @@ def _ocr_field_image(image: Any, field_id: str) -> dict[str, Any]:
     return {
         "raw_text": str(raw_text or ""),
         "confidence": confidence,
+        "profile_id": profile.profile_id,
         "engine_result": _to_jsonable(result),
     }
 
