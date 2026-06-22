@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from lsco_tdcj_intake.imaging.drop_color import remove_drop_color_bgr
 
 import re
 
@@ -19,31 +20,6 @@ class OCRResult:
     engine: str = "tesseract"
 
 
-def _drop_form_color_bgr(image: np.ndarray) -> np.ndarray:
-    """
-    Remove LSCO/drop-color form ink before OCR.
-
-    Assumes OpenCV BGR input. Green-ish pixels are converted to white.
-    Black handwriting/print should remain.
-    """
-    if image.ndim != 3:
-        return image
-
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-    # Broad green/cyan-green band. Conservative saturation/value floor avoids
-    # turning dark handwriting white.
-    lower_green = np.array([35, 25, 40], dtype=np.uint8)
-    upper_green = np.array([100, 255, 255], dtype=np.uint8)
-
-    mask = cv2.inRange(hsv, lower_green, upper_green)
-
-    cleaned = image.copy()
-    cleaned[mask > 0] = (255, 255, 255)
-
-    return cleaned
-
-
 def _to_gray(image: Any, *, drop_form_color: bool = True) -> np.ndarray:
     if isinstance(image, (str, Path)):
         img = cv2.imread(str(image), cv2.IMREAD_COLOR)
@@ -51,7 +27,7 @@ def _to_gray(image: Any, *, drop_form_color: bool = True) -> np.ndarray:
             raise FileNotFoundError(f"Could not read image: {image}")
 
         if drop_form_color:
-            img = _drop_form_color_bgr(img)
+            img = remove_drop_color_bgr(img)
 
         return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -61,7 +37,7 @@ def _to_gray(image: Any, *, drop_form_color: bool = True) -> np.ndarray:
 
         img = image
         if drop_form_color:
-            img = _drop_form_color_bgr(img)
+            img = remove_drop_color_bgr(img)
 
         return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
