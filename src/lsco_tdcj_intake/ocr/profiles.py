@@ -22,6 +22,14 @@ OCR_PROFILES: dict[str, OCRProfile] = {
         min_confidence=0.70,
         review_if_blank=True,
     ),
+    "single_letter_review": OCRProfile(
+        profile_id="single_letter_review",
+        description="Single-character field; OCR candidate is evidence only and should be reviewed.",
+        allowlist="ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        normalize="uppercase_strip",
+        min_confidence=0.95,
+        review_if_blank=True,
+    ),
     "boxed_numeric": OCRProfile(
         profile_id="boxed_numeric",
         description="Boxed numeric field.",
@@ -68,7 +76,7 @@ OCR_PROFILES: dict[str, OCRProfile] = {
 PAGE1_OCR_FIELD_PROFILES: dict[str, str] = {
     "p1_last_name": "boxed_text",
     "p1_first_name": "boxed_text",
-    "p1_mi": "boxed_text",
+    "p1_mi": "single_letter_review",
     "p1_former_name": "optional_text",
     "p1_date_of_birth": "boxed_date_digits",
     "p1_tdcj_number": "boxed_numeric",
