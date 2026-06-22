@@ -63,6 +63,22 @@ def write_json(payload: dict, path: Path) -> None:
 def clean(value: str | None) -> str:
     return str(value or "").strip()
 
+def normalize_review_value(field_id: str, value: str) -> str:
+    if not value:
+        return ""
+
+    digits = "".join(ch for ch in value if ch.isdigit())
+
+    if field_id == "p1_date_of_birth" and len(digits) <= 8:
+        return digits.zfill(8)
+
+    if field_id == "p1_ssn" and len(digits) <= 9:
+        return digits.zfill(9)
+
+    if field_id == "p1_tdcj_number" and len(digits) <= 8:
+        return digits.zfill(8)
+
+    return value
 
 def first_present(row: dict[str, str], names: list[str]) -> str:
     for name in names:
@@ -180,7 +196,10 @@ def apply_review_rows(
         if not field_id:
             continue
 
-        review_value = clean(row.get("review_value"))
+        review_value = normalize_review_value(
+            field_id,
+            clean(row.get("review_value")),
+        )
         machine_value = machine_value_from_review(row)
 
         if review_value:
