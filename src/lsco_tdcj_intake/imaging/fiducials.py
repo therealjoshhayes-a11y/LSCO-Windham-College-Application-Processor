@@ -68,7 +68,7 @@ def find_square_candidates(
     min_area: float = 100.0,
     max_area_ratio: float = 0.02,
     min_aspect: float = 0.70,
-    max_aspect: float = 1.30,
+    max_aspect: float = 1.50,
 ) -> list[FiducialCandidate]:
     """Find square-like dark connected components."""
     mask = threshold_dark_regions(gray_image)
@@ -107,18 +107,94 @@ def find_square_candidates(
     return sorted(candidates, key=lambda item: item.area, reverse=True)
 
 
-def order_fiducials(candidates: list[FiducialCandidate]) -> OrderedFiducials:
-    """Order four fiducial candidates as page corners."""
+def order_fiducials(
+    candidates: list[FiducialCandidate],
+    image_shape: tuple[int, int] | tuple[int, int, int] | None = None,
+) -> OrderedFiducials:
+    """Order fiducial candidates as page corners.
+
+    Prefer candidates physically located near the four page corners.
+    This prevents large handwritten marks or checked boxes from being
+    selected as corner fiducials.
+    """
     if len(candidates) < 4:
         raise ValueError(f"Need at least 4 fiducial candidates, found {len(candidates)}")
 
-    selected = candidates[:4]
+    if image_shape is None:
+        # Legacy fallback: old behavior.
+        selected = candidates[:4]
 
-    top_two = sorted(selected, key=lambda item: item.center_y)[:2]
-    bottom_two = sorted(selected, key=lambda item: item.center_y)[-2:]
+        top_two = sorted(selected, key=lambda item: item.center_y)[:2]
+        bottom_two = sorted(selected, key=lambda item: item.center_y)[-2:]
 
-    top_left, top_right = sorted(top_two, key=lambda item: item.center_x)
-    bottom_left, bottom_right = sorted(bottom_two, key=lambda item: item.center_x)
+        top_left, top_right = sorted(top_two, key=lambda item: item.center_x)
+        bottom_left, bottom_right = sorted(bottom_two, key=lambda item: item.center_x)
+
+        return OrderedFiducials(
+            top_left=top_left,
+            top_right=top_right,
+            bottom_right=bottom_right,
+            bottom_left=bottom_left,
+        )
+
+    image_height = int(image_shape[0])
+    image_width = int(image_shape[1])
+
+    corner_zone_x = image_width * 0.15
+    corner_zone_y = image_height * 0.15
+
+    def choose_nearest_corner(
+        corner_name: str,
+        target_x: float,
+        target_y: float,
+        in_zone,
+    ) -> FiducialCandidate:
+        zone_candidates = [candidate for candidate in candidates if in_zone(candidate)]
+
+        if not zone_candidates:
+            raise ValueError(
+                f"No fiducial candidate found in {corner_name} corner zone "
+                f"from {len(candidates)} candidates"
+            )
+
+        return min(
+            zone_candidates,
+            key=lambda candidate: (
+                (candidate.center_x - target_x) ** 2
+                + (candidate.center_y - target_y) ** 2
+            ),
+        )
+
+    top_left = choose_nearest_corner(
+        "top-left",
+        0.0,
+        0.0,
+        lambda item: item.center_x <= corner_zone_x and item.center_y <= corner_zone_y,
+    )
+
+    top_right = choose_nearest_corner(
+        "top-right",
+        float(image_width),
+        0.0,
+        lambda item: item.center_x >= image_width - corner_zone_x
+        and item.center_y <= corner_zone_y,
+    )
+
+    bottom_right = choose_nearest_corner(
+        "bottom-right",
+        float(image_width),
+        float(image_height),
+        lambda item: item.center_x >= image_width - corner_zone_x
+        and item.center_y >= image_height - corner_zone_y,
+    )
+
+    bottom_left = choose_nearest_corner(
+        "bottom-left",
+        0.0,
+        float(image_height),
+        lambda item: item.center_x <= corner_zone_x
+        and item.center_y >= image_height - corner_zone_y,
+    )
 
     return OrderedFiducials(
         top_left=top_left,
@@ -131,7 +207,7 @@ def order_fiducials(candidates: list[FiducialCandidate]) -> OrderedFiducials:
 def detect_ordered_fiducials(gray_image: np.ndarray) -> OrderedFiducials:
     """Detect and order page corner fiducials."""
     candidates = find_square_candidates(gray_image)
-    return order_fiducials(candidates)
+    return order_fiducials(candidates, image_shape=gray_image.shape)
 
 
 def draw_fiducial_debug(image_bgr: np.ndarray, ordered: OrderedFiducials) -> np.ndarray:
