@@ -12,3 +12,4 @@ streamlit
 numpy
 rapidfuzz
 pytest
+flask
