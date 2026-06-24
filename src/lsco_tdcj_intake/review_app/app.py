@@ -13,6 +13,7 @@ from lsco_tdcj_intake.review_app.packet_store import (
     read_packet_review_rows,
     registry_summary,
     save_review_decision,
+    export_approved_admissions_batch,
 )
 
 
@@ -32,6 +33,15 @@ def create_app() -> Flask:
             summary=summary,
             selected_status=status,
         )
+    
+    @app.route("/export-approved-admissions", methods=["POST"])
+    def export_approved_admissions_route():
+        exported = export_approved_admissions_batch()
+
+        if not exported:
+            return redirect(url_for("index", export_error="failed"))
+
+        return redirect(url_for("index", export_status="success"))
 
     @app.route("/packet/<packet_id>")
     def packet_detail(packet_id: str):

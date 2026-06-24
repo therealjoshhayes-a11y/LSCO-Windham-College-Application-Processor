@@ -305,3 +305,17 @@ def approve_packet(packet_id: str, reviewer: str = "local_app") -> bool:
         writer.writerows(rows)
 
     return True
+
+def export_approved_admissions_batch() -> bool:
+    """Run the approved admissions batch export script."""
+    cmd = [
+        sys.executable,
+        str(PROJECT_ROOT / "scripts" / "export_approved_admissions_batch.py"),
+    ]
+
+    try:
+        subprocess.run(cmd, cwd=PROJECT_ROOT, check=True)
+    except subprocess.CalledProcessError:
+        return False
+
+    return True

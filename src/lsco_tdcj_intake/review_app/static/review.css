@@ -485,3 +485,13 @@ tr:last-child td {
     color: var(--ink);
     font-weight: 800;
 }
+.dashboard-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+.alert-box.success {
+    border-color: var(--lsco-green);
+    background: #eef8f3;
+}

@@ -15,24 +15,20 @@
                     alt="Lamar State College Orange"
                 >
                 <div>
-                    <p class="eyebrow">Lamar State College Orange</p>
-                    <h1>TDCJ Intake Review Dashboard</h1>
-                    <p class="subtitle">Local review control panel for Windham College application packets</p>
+                    <p class="eyebrow">TDCJ Intake Review</p>
+                    <h1>Review Dashboard</h1>
+                    <p class="subtitle">Packet queue, review status, and Admissions export controls.</p>
                 </div>
             </div>
             <div class="hero-badge">
-                <span>Local MVP</span>
-                <strong>No Cloud OCR</strong>
+                <span>Total Packets</span>
+                <strong>{{ summary.total }}</strong>
             </div>
         </header>
 
         <section class="summary-grid">
             <div class="summary-card primary">
-                <span class="summary-label">Total Packets</span>
-                <strong>{{ summary.total }}</strong>
-            </div>
-            <div class="summary-card">
-                <span class="summary-label">Needs Review</span>
+                <span class="summary-label">Review Pending</span>
                 <strong>{{ summary.review_pending }}</strong>
             </div>
             <div class="summary-card">
@@ -47,62 +43,86 @@
                 <span class="summary-label">Exported</span>
                 <strong>{{ summary.exported }}</strong>
             </div>
-            <div class="summary-card danger">
+            <div class="summary-card">
                 <span class="summary-label">Failed</span>
                 <strong>{{ summary.failed }}</strong>
             </div>
         </section>
 
-        <nav class="filters" aria-label="Packet filters">
-            <a href="/?status=active" class="{{ 'active' if status_filter == 'active' else '' }}">Active</a>
-            <a href="/?status=review_pending" class="{{ 'active' if status_filter == 'review_pending' else '' }}">Needs Review</a>
-            <a href="/?status=review_in_progress" class="{{ 'active' if status_filter == 'review_in_progress' else '' }}">In Progress</a>
-            <a href="/?status=approved" class="{{ 'active' if status_filter == 'approved' else '' }}">Approved</a>
-            <a href="/?status=exported" class="{{ 'active' if status_filter == 'exported' else '' }}">Exported</a>
-            <a href="/?status=failed" class="{{ 'active' if status_filter == 'failed' else '' }}">Failed</a>
-            <a href="/?status=all" class="{{ 'active' if status_filter == 'all' else '' }}">All</a>
+        <nav class="filters">
+            <a class="{% if selected_status == 'active' %}selected{% endif %}" href="{{ url_for('index', status='active') }}">Active</a>
+            <a class="{% if selected_status == 'review_pending' %}selected{% endif %}" href="{{ url_for('index', status='review_pending') }}">Review Pending</a>
+            <a class="{% if selected_status == 'approved' %}selected{% endif %}" href="{{ url_for('index', status='approved') }}">Approved</a>
+            <a class="{% if selected_status == 'exported' %}selected{% endif %}" href="{{ url_for('index', status='exported') }}">Exported</a>
+            <a class="{% if selected_status == 'failed' %}selected{% endif %}" href="{{ url_for('index', status='failed') }}">Failed</a>
+            <a class="{% if selected_status == 'all' %}selected{% endif %}" href="{{ url_for('index', status='all') }}">All</a>
         </nav>
 
         <section class="packet-table-card">
+            {% if request.args.get("export_status") == "success" %}
+            <div class="alert-box success">
+                Approved Admissions batch export completed.
+            </div>
+            {% endif %}
+
+            {% if request.args.get("export_error") == "failed" %}
+            <div class="alert-box">
+                Admissions batch export failed. Check that at least one approved packet has an admissions export row.
+            </div>
+            {% endif %}
+
             <div class="table-header">
                 <div>
-                    <h2>Packet Queue</h2>
-                    <p>Default view hides approved and exported packets.</p>
+                    <h2>Packet Registry</h2>
+                    <p>Approved packets can be exported into an Admissions batch CSV.</p>
                 </div>
+
+                <form method="post" action="{{ url_for('export_approved_admissions_route') }}">
+                    <button type="submit" class="primary-button">
+                        Export Approved Admissions Batch
+                    </button>
+                </form>
             </div>
 
             <table>
                 <thead>
                     <tr>
-                        <th>Packet</th>
+                        <th>Packet ID</th>
                         <th>Status</th>
-                        <th>Pending</th>
-                        <th>Last</th>
-                        <th>First</th>
-                        <th>MI</th>
+                        <th>Student</th>
                         <th>TDCJ #</th>
                         <th>DOB</th>
+                        <th>Pending</th>
+                        <th>Updated</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for packet in packets %}
                     <tr>
                         <td class="mono packet-id">
-                             <a href="{{ url_for('packet_detail', packet_id=packet.packet_id) }}">
+                            <a href="{{ url_for('packet_detail', packet_id=packet.packet_id) }}">
                                 {{ packet.packet_id }}
                             </a>
                         </td>
-                        <td><span class="status-pill status-{{ packet.status }}">{{ packet.status }}</span></td>
-                        <td><strong>{{ packet.pending_review_count }}</strong></td>
-                        <td>{{ packet.student_last_name }}</td>
-                        <td>{{ packet.student_first_name }}</td>
-                        <td>{{ packet.student_mi }}</td>
+                        <td>
+                            <span class="status-pill {{ packet.status }}">
+                                {{ packet.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <strong>{{ packet.student_last_name }}, {{ packet.student_first_name }}</strong>
+                            {% if packet.student_mi %}
+                                <span>{{ packet.student_mi }}</span>
+                            {% endif %}
+                        </td>
                         <td class="mono">{{ packet.tdcj_number }}</td>
                         <td class="mono">{{ packet.dob }}</td>
+                        <td class="mono">{{ packet.pending_review_count }}</td>
+                        <td class="mono">{{ packet.updated_at }}</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="8" class="empty">No packets match this filter.</td>
+                        <td colspan="7" class="empty">No packets found for this filter.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
