@@ -55,50 +55,92 @@
             <div class="table-header">
                 <div>
                     <h2>Pending Review Queue</h2>
-                    <p>Read-only view. Review actions come next.</p>
+                    <p>Review each field, enter a correction when needed, then save the decision.</p>
                 </div>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Evidence</th>
-                        <th>Field ID</th>
-                        <th>Label</th>
-                        <th>Machine Value</th>
-                        <th>Issue / Reason</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in review_rows %}
-                    <tr>
-                        <td>
-                            {% if row.evidence_relative_path %}
-                                <a href="{{ url_for('packet_file', packet_id=packet.packet_id, relative_path=row.evidence_relative_path) }}" target="_blank">
-                                    <img
-                                        class="evidence-thumb"
-                                        src="{{ url_for('packet_file', packet_id=packet.packet_id, relative_path=row.evidence_relative_path) }}"
-                                        alt="Evidence crop for {{ row.field_id }}"
-                                    >
-                                </a>
-                            {% else %}
-                                <span class="no-evidence">No image</span>
+            <div class="review-list">
+                {% for row in review_rows %}
+                <article class="review-card">
+                    <div class="review-evidence">
+                        {% if row.evidence_relative_path %}
+                            <a href="{{ url_for('packet_file', packet_id=packet.packet_id, relative_path=row.evidence_relative_path) }}" target="_blank">
+                                <img
+                                    class="evidence-thumb-large"
+                                    src="{{ url_for('packet_file', packet_id=packet.packet_id, relative_path=row.evidence_relative_path) }}"
+                                    alt="Evidence crop for {{ row.field_id }}"
+                                >
+                            </a>
+                        {% else %}
+                            <span class="no-evidence">No image</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="review-main">
+                        <div class="review-heading">
+                            <div>
+                                <h3>{{ row.label or row.field_label or row.name or row.field_id }}</h3>
+                                <p class="mono">{{ row.field_id }} · {{ row.review_source }}</p>
+                            </div>
+                            <span class="status-pill review">{{ row.status }}</span>
+                        </div>
+
+                        <div class="review-values">
+                            <div>
+                                <span class="field-label">Machine Value</span>
+                                <strong class="mono">{{ row.machine_value }}</strong>
+                            </div>
+                            {% if row.numeric_fullfield_digits %}
+                            <div>
+                                <span class="field-label">Numeric Evidence</span>
+                                <strong class="mono">
+                                    {{ row.numeric_fullfield_digits }}
+                                    {% if row.numeric_shape_valid %}
+                                        · shape valid: {{ row.numeric_shape_valid }}
+                                    {% endif %}
+                                </strong>
+                            </div>
                             {% endif %}
-                        </td>
-                        <td class="mono packet-id">{{ row.field_id }}</td>
-                        <td>{{ row.label or row.field_label or row.name }}</td>
-                        <td class="mono">
-                            {{ row.machine_value or row.ocr_value or row.suggested_value or row.value }}
-                        </td>
-                        <td>{{ row.reason or row.review_reason or row.status or row.issue }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="empty">No pending review rows found for this packet.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            <div>
+                                <span class="field-label">Reason</span>
+                                <p>{{ row.notes }}</p>
+                            </div>
+                        </div>
+
+                        <form class="review-form" method="post" action="#">
+                            <input type="hidden" name="field_id" value="{{ row.field_id }}">
+
+                            <label>
+                                Review Value
+                                <input
+                                    type="text"
+                                    name="review_value"
+                                    value="{{ row.review_value }}"
+                                    placeholder="Enter corrected/approved value"
+                                >
+                            </label>
+
+                            <label>
+                                Review Notes
+                                <textarea
+                                    name="review_notes"
+                                    rows="2"
+                                    placeholder="Optional reviewer note"
+                                >{{ row.review_notes }}</textarea>
+                            </label>
+
+                            <div class="review-actions">
+                                <button type="button" class="secondary-button">Accept Machine Value</button>
+                                <button type="button" class="primary-button">Save Correction</button>
+                                <button type="button" class="warning-button">Needs Supervisor</button>
+                            </div>
+                        </form>
+                    </div>
+                </article>
+                {% else %}
+                <div class="empty">No pending review rows found for this packet.</div>
+                {% endfor %}
+            </div>
         </section>
     </main>
 </body>
