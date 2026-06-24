@@ -148,10 +148,7 @@ def build_row_for_packet(packet_dir: Path, existing: dict[str, str] | None) -> P
 
     pending_count = get_pending_review_count(packet_dir)
 
-    if pending_count > 0:
-        default_status = "review_pending"
-    else:
-        default_status = "review_in_progress"
+    default_status = "review_pending"
 
     status = default_status
 
