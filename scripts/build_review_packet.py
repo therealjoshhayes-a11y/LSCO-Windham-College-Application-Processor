@@ -104,7 +104,18 @@ def copy_review_artifacts(packet_id: str) -> None:
     print()
     print("=== Copy review artifacts ===")
     for source, destination in artifacts:
-        copy_if_exists(source, destination)
+        copy_if_exists(source, destination) 
+
+    shared_crops_dir = SHARED_OCR_ROOT / "crops"
+    packet_evidence_dir = review_dir / "evidence" / "page1_ocr_crops"
+
+    if shared_crops_dir.exists():
+        if packet_evidence_dir.exists():
+            shutil.rmtree(packet_evidence_dir)
+        shutil.copytree(shared_crops_dir, packet_evidence_dir)
+        print(f"Copied OCR evidence crops: {shared_crops_dir} -> {packet_evidence_dir}")
+    else:
+        print(f"Skipped missing OCR evidence crops: {shared_crops_dir}")
 
 
 def main() -> int:
