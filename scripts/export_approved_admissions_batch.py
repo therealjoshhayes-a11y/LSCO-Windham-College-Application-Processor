@@ -1,6 +1,8 @@
 ﻿from __future__ import annotations
 
 import csv
+import json
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -9,6 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REVIEW_PACKETS_ROOT = PROJECT_ROOT / "data" / "processed" / "review_packets"
 REGISTRY_PATH = REVIEW_PACKETS_ROOT / "packet_registry.csv"
 EXPORT_ROOT = PROJECT_ROOT / "data" / "exports" / "admissions"
+LOCAL_SETTINGS_PATH = PROJECT_ROOT / "config" / "local_export_settings.json"
 
 
 def read_csv_rows(path: Path) -> list[dict[str, str]]:
@@ -23,6 +26,36 @@ def write_csv_rows(path: Path, rows: list[dict[str, str]], fieldnames: list[str]
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
+
+
+def read_shared_export_folder() -> Path | None:
+    if not LOCAL_SETTINGS_PATH.exists():
+        return None
+
+    with LOCAL_SETTINGS_PATH.open("r", encoding="utf-8-sig") as f:
+        settings = json.load(f)
+
+    folder = (settings.get("shared_admissions_export_folder") or "").strip()
+    if not folder:
+        return None
+
+    return Path(folder)
+
+
+def copy_to_shared_folder(local_batch_path: Path, shared_folder: Path) -> None:
+    shared_folder.mkdir(parents=True, exist_ok=True)
+
+    archive_folder = shared_folder / "archive"
+    archive_folder.mkdir(parents=True, exist_ok=True)
+
+    current_path = shared_folder / "admissions_batch_current.csv"
+    archived_path = archive_folder / local_batch_path.name
+
+    shutil.copy2(local_batch_path, current_path)
+    shutil.copy2(local_batch_path, archived_path)
+
+    print(f"Shared current CSV: {current_path}")
+    print(f"Shared archive CSV: {archived_path}")
 
 
 def main() -> int:
@@ -73,6 +106,12 @@ def main() -> int:
     print(f"Approved packets found: {len(approved_packets)}")
     print(f"Admissions rows exported: {len(export_rows)}")
     print(f"Output CSV: {output_path}")
+
+    shared_folder = read_shared_export_folder()
+    if shared_folder is None:
+        print("Shared export folder not configured. Local export only.")
+    else:
+        copy_to_shared_folder(output_path, shared_folder)
 
     if missing_exports:
         print(f"Approved packets missing export rows: {missing_exports}")
