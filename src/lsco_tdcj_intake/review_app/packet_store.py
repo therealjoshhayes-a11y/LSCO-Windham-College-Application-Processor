@@ -284,10 +284,14 @@ def approve_packet(packet_id: str, reviewer: str = "local_app") -> bool:
             continue
 
         row["status"] = "approved"
+        row["pending_review_count"] = "0"
         row["reviewed_at"] = row.get("reviewed_at") or now
         row["approved_at"] = now
         row["updated_at"] = now
         row["reviewer"] = reviewer
+        row["admissions_export_path"] = str(
+            get_packet_dir(packet_id) / "admissions_export_row.csv"
+        )
         row["error"] = ""
         updated = True
         break
