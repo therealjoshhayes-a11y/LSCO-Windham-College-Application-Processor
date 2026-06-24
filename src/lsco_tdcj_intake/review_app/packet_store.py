@@ -121,3 +121,56 @@ def add_evidence_paths(packet_id: str, rows: list[dict[str, str]]) -> list[dict[
         enriched_rows.append(enriched)
 
     return enriched_rows
+
+
+def save_review_decision(
+    packet_id: str,
+    field_id: str,
+    action: str,
+    review_value: str,
+    review_notes: str,
+) -> bool:
+    """Save one human review decision back to the reviewer CSV."""
+    packet_dir = get_packet_dir(packet_id)
+    review_csv = packet_dir / "human_review_queue_FOR_REVIEW.csv"
+
+    if not review_csv.exists():
+        return False
+
+    with review_csv.open("r", newline="", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        fieldnames = reader.fieldnames or []
+        rows = list(reader)
+
+    updated = False
+    for row in rows:
+        if (row.get("field_id") or "").strip() != field_id:
+            continue
+
+        machine_value = row.get("machine_value") or ""
+
+        if action == "accept_machine":
+            row["review_value"] = machine_value
+            row["status"] = "accepted_by_reviewer"
+        elif action == "save_correction":
+            row["review_value"] = review_value.strip()
+            row["status"] = "corrected_by_reviewer"
+        elif action == "needs_supervisor":
+            row["review_value"] = review_value.strip()
+            row["status"] = "needs_supervisor_review"
+        else:
+            return False
+
+        row["review_notes"] = review_notes.strip()
+        updated = True
+        break
+
+    if not updated:
+        return False
+
+    with review_csv.open("w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    return True

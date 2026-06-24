@@ -462,3 +462,17 @@ tr:last-child td {
         grid-template-columns: 1fr;
     }
 }
+.status-pill.review {
+    background: #eef4f0;
+    color: var(--lsco-green);
+}
+
+.status-pill.resolved {
+    background: var(--lsco-green);
+    color: white;
+}
+
+.status-pill.supervisor {
+    background: var(--lsco-orange);
+    color: white;
+}

@@ -82,7 +82,13 @@
                                 <h3>{{ row.label or row.field_label or row.name or row.field_id }}</h3>
                                 <p class="mono">{{ row.field_id }} · {{ row.review_source }}</p>
                             </div>
-                            <span class="status-pill review">{{ row.status }}</span>
+                            {% if row.status in ["accepted_by_reviewer", "corrected_by_reviewer"] %}
+                                <span class="status-pill resolved">{{ row.status }}</span>
+                            {% elif row.status == "needs_supervisor_review" %}
+                                <span class="status-pill supervisor">{{ row.status }}</span>
+                            {% else %}
+                                <span class="status-pill review">{{ row.status }}</span>
+                            {% endif %}
                         </div>
 
                         <div class="review-values">
@@ -107,7 +113,7 @@
                             </div>
                         </div>
 
-                        <form class="review-form" method="post" action="#">
+                        <form class="review-form" method="post" action="{{ url_for('save_packet_review', packet_id=packet.packet_id) }}">
                             <input type="hidden" name="field_id" value="{{ row.field_id }}">
 
                             <label>
@@ -130,9 +136,15 @@
                             </label>
 
                             <div class="review-actions">
-                                <button type="button" class="secondary-button">Accept Machine Value</button>
-                                <button type="button" class="primary-button">Save Correction</button>
-                                <button type="button" class="warning-button">Needs Supervisor</button>
+                                <button type="submit" name="action" value="accept_machine" class="secondary-button">
+                                    Accept Machine Value
+                                </button>
+                                <button type="submit" name="action" value="save_correction" class="primary-button">
+                                    Save Correction
+                                </button>
+                                <button type="submit" name="action" value="needs_supervisor" class="warning-button">
+                                    Needs Supervisor
+                                </button>
                             </div>
                         </form>
                     </div>

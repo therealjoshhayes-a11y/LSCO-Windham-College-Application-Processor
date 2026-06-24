@@ -1,17 +1,16 @@
 from __future__ import annotations
 
-from pathlib import Path
-
-from flask import Flask, abort, render_template, request, send_file
+from flask import Flask, abort, redirect, render_template, request, send_file, url_for
 
 from lsco_tdcj_intake.review_app.packet_store import (
     REVIEW_PACKETS_ROOT,
-    filter_packets,
     add_evidence_paths,
+    filter_packets,
     get_packet,
     read_packet_registry,
     read_packet_review_rows,
     registry_summary,
+    save_review_decision,
 )
 
 
@@ -20,16 +19,16 @@ def create_app() -> Flask:
 
     @app.route("/")
     def index():
-        status_filter = request.args.get("status", "active")
         all_packets = read_packet_registry()
-        visible_packets = filter_packets(all_packets, status_filter)
+        status = request.args.get("status", "active")
+        packets = filter_packets(all_packets, status)
         summary = registry_summary(all_packets)
 
         return render_template(
             "index.html",
-            packets=visible_packets,
+            packets=packets,
             summary=summary,
-            status_filter=status_filter,
+            selected_status=status,
         )
 
     @app.route("/packet/<packet_id>")
@@ -48,6 +47,30 @@ def create_app() -> Flask:
             packet=packet,
             review_rows=review_rows,
         )
+
+    @app.route("/packet/<packet_id>/review", methods=["POST"])
+    def save_packet_review(packet_id: str):
+        packet = get_packet(packet_id)
+        if packet is None:
+            abort(404)
+
+        field_id = request.form.get("field_id", "")
+        action = request.form.get("action", "")
+        review_value = request.form.get("review_value", "")
+        review_notes = request.form.get("review_notes", "")
+
+        saved = save_review_decision(
+            packet_id=packet_id,
+            field_id=field_id,
+            action=action,
+            review_value=review_value,
+            review_notes=review_notes,
+        )
+
+        if not saved:
+            abort(400)
+
+        return redirect(url_for("packet_detail", packet_id=packet_id))
 
     @app.route("/packet-file/<packet_id>/<path:relative_path>")
     def packet_file(packet_id: str, relative_path: str):
