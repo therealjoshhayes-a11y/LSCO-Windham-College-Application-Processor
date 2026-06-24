@@ -89,3 +89,35 @@ def read_packet_review_rows(packet_id: str) -> list[dict[str, str]]:
 
     with review_csv.open("r", newline="", encoding="utf-8-sig") as f:
         return list(csv.DictReader(f))
+
+
+def add_evidence_paths(packet_id: str, rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Attach packet-relative evidence image paths when available."""
+    packet_dir = get_packet_dir(packet_id)
+
+    enriched_rows: list[dict[str, str]] = []
+    for row in rows:
+        enriched = dict(row)
+        field_id = (row.get("field_id") or "").strip()
+
+        evidence_relative_path = ""
+
+        ocr_evidence_path = packet_dir / "evidence" / "page1_ocr_crops" / f"{field_id}.png"
+        if field_id.startswith("p1_") and ocr_evidence_path.exists():
+            evidence_relative_path = str(
+                ocr_evidence_path.relative_to(packet_dir)
+            ).replace("\\", "/")
+
+        if not evidence_relative_path:
+            checkbox_evidence_root = packet_dir / "evidence" / "checkbox_debug"
+            if checkbox_evidence_root.exists():
+                checkbox_matches = list(checkbox_evidence_root.rglob(f"{field_id}.png"))
+                if checkbox_matches:
+                    evidence_relative_path = str(
+                        checkbox_matches[0].relative_to(packet_dir)
+                    ).replace("\\", "/")
+
+        enriched["evidence_relative_path"] = evidence_relative_path
+        enriched_rows.append(enriched)
+
+    return enriched_rows

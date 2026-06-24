@@ -110,12 +110,28 @@ def copy_review_artifacts(packet_id: str) -> None:
     packet_evidence_dir = review_dir / "evidence" / "page1_ocr_crops"
 
     if shared_crops_dir.exists():
-        if packet_evidence_dir.exists():
-            shutil.rmtree(packet_evidence_dir)
-        shutil.copytree(shared_crops_dir, packet_evidence_dir)
+        shutil.copytree(
+            shared_crops_dir,
+            packet_evidence_dir,
+            dirs_exist_ok=True,
+        )
         print(f"Copied OCR evidence crops: {shared_crops_dir} -> {packet_evidence_dir}")
     else:
         print(f"Skipped missing OCR evidence crops: {shared_crops_dir}")
+
+    checkbox_debug_dir = checkbox_dir / "checkbox_debug"
+    packet_checkbox_evidence_dir = review_dir / "evidence" / "checkbox_debug"
+
+    if checkbox_debug_dir.exists():
+        if packet_checkbox_evidence_dir.exists():
+            shutil.rmtree(packet_checkbox_evidence_dir)
+        shutil.copytree(checkbox_debug_dir, packet_checkbox_evidence_dir)
+        print(
+            f"Copied checkbox evidence: {checkbox_debug_dir} -> "
+            f"{packet_checkbox_evidence_dir}"
+        )
+    else:
+        print(f"Skipped missing checkbox evidence: {checkbox_debug_dir}")
 
 
 def main() -> int:

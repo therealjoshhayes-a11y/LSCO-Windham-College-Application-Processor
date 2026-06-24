@@ -62,6 +62,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th>Evidence</th>
                         <th>Field ID</th>
                         <th>Label</th>
                         <th>Machine Value</th>
@@ -71,6 +72,19 @@
                 <tbody>
                     {% for row in review_rows %}
                     <tr>
+                        <td>
+                            {% if row.evidence_relative_path %}
+                                <a href="{{ url_for('packet_file', packet_id=packet.packet_id, relative_path=row.evidence_relative_path) }}" target="_blank">
+                                    <img
+                                        class="evidence-thumb"
+                                        src="{{ url_for('packet_file', packet_id=packet.packet_id, relative_path=row.evidence_relative_path) }}"
+                                        alt="Evidence crop for {{ row.field_id }}"
+                                    >
+                                </a>
+                            {% else %}
+                                <span class="no-evidence">No image</span>
+                            {% endif %}
+                        </td>
                         <td class="mono packet-id">{{ row.field_id }}</td>
                         <td>{{ row.label or row.field_label or row.name }}</td>
                         <td class="mono">
@@ -80,7 +94,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="empty">No pending review rows found for this packet.</td>
+                        <td colspan="5" class="empty">No pending review rows found for this packet.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

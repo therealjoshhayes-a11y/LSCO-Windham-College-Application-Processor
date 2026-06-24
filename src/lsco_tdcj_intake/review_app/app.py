@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from flask import Flask, abort, render_template, request, send_from_directory
+from flask import Flask, abort, render_template, request, send_file
 
 from lsco_tdcj_intake.review_app.packet_store import (
     REVIEW_PACKETS_ROOT,
     filter_packets,
+    add_evidence_paths,
     get_packet,
     read_packet_registry,
     read_packet_review_rows,
@@ -37,7 +38,10 @@ def create_app() -> Flask:
         if packet is None:
             abort(404)
 
-        review_rows = read_packet_review_rows(packet_id)
+        review_rows = add_evidence_paths(
+            packet_id,
+            read_packet_review_rows(packet_id),
+        )
 
         return render_template(
             "packet.html",
@@ -62,9 +66,6 @@ def create_app() -> Flask:
         if not requested_path.exists() or not requested_path.is_file():
             abort(404)
 
-        return send_from_directory(
-            packet_dir,
-            str(requested_path.relative_to(packet_dir)),
-        )
+        return send_file(requested_path)
 
     return app

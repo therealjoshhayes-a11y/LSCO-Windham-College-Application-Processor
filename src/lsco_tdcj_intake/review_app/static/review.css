@@ -311,3 +311,19 @@ tr:last-child td {
 .packet-id a:hover {
     text-decoration: underline;
 }
+.evidence-thumb {
+    display: block;
+    width: 180px;
+    max-height: 72px;
+    object-fit: contain;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.no-evidence {
+    color: var(--muted);
+    font-size: 12px;
+    font-style: italic;
+}
