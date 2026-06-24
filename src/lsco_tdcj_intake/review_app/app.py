@@ -5,8 +5,10 @@ from flask import Flask, abort, redirect, render_template, request, send_file, u
 from lsco_tdcj_intake.review_app.packet_store import (
     REVIEW_PACKETS_ROOT,
     add_evidence_paths,
+    approve_packet,
     filter_packets,
     get_packet,
+    packet_has_unresolved_reviews,
     read_packet_registry,
     read_packet_review_rows,
     registry_summary,
@@ -68,6 +70,28 @@ def create_app() -> Flask:
         )
 
         if not saved:
+            abort(400)
+
+        return redirect(url_for("packet_detail", packet_id=packet_id))
+
+    @app.route("/packet/<packet_id>/approve", methods=["POST"])
+    def approve_packet_route(packet_id: str):
+        packet = get_packet(packet_id)
+        if packet is None:
+            abort(404)
+
+        if packet_has_unresolved_reviews(packet_id):
+            return redirect(
+                url_for(
+                    "packet_detail",
+                    packet_id=packet_id,
+                    approval_error="unresolved",
+                )
+            )
+
+        approved = approve_packet(packet_id=packet_id)
+
+        if not approved:
             abort(400)
 
         return redirect(url_for("packet_detail", packet_id=packet_id))

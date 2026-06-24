@@ -34,7 +34,7 @@
 
         <section class="summary-grid">
             <div class="summary-card primary">
-                <span class="summary-label">Pending Review Fields</span>
+                <span class="summary-label">Review Fields</span>
                 <strong>{{ review_rows|length }}</strong>
             </div>
             <div class="summary-card">
@@ -52,11 +52,23 @@
         </section>
 
         <section class="packet-table-card">
+            {% if request.args.get("approval_error") == "unresolved" %}
+            <div class="alert-box">
+                Packet cannot be approved yet. Resolve every review item first.
+            </div>
+            {% endif %}
+
             <div class="table-header">
                 <div>
-                    <h2>Pending Review Queue</h2>
-                    <p>Review each field, enter a correction when needed, then save the decision.</p>
+                    <h2>Packet Review Case</h2>
+                    <p>Review each field, enter corrections when needed, then approve the packet when the case is complete.</p>
                 </div>
+
+                <form method="post" action="{{ url_for('approve_packet_route', packet_id=packet.packet_id) }}">
+                    <button type="submit" class="primary-button">
+                        Approve Packet
+                    </button>
+                </form>
             </div>
 
             <div class="review-list">
@@ -82,13 +94,7 @@
                                 <h3>{{ row.label or row.field_label or row.name or row.field_id }}</h3>
                                 <p class="mono">{{ row.field_id }} · {{ row.review_source }}</p>
                             </div>
-                            {% if row.status in ["accepted_by_reviewer", "corrected_by_reviewer"] %}
-                                <span class="status-pill resolved">{{ row.status }}</span>
-                            {% elif row.status == "needs_supervisor_review" %}
-                                <span class="status-pill supervisor">{{ row.status }}</span>
-                            {% else %}
-                                <span class="status-pill review">{{ row.status }}</span>
-                            {% endif %}
+                            <span class="status-pill review">{{ row.status }}</span>
                         </div>
 
                         <div class="review-values">
@@ -96,6 +102,7 @@
                                 <span class="field-label">Machine Value</span>
                                 <strong class="mono">{{ row.machine_value }}</strong>
                             </div>
+
                             {% if row.numeric_fullfield_digits %}
                             <div>
                                 <span class="field-label">Numeric Evidence</span>
@@ -107,13 +114,18 @@
                                 </strong>
                             </div>
                             {% endif %}
+
                             <div>
                                 <span class="field-label">Reason</span>
                                 <p>{{ row.notes }}</p>
                             </div>
                         </div>
 
-                        <form class="review-form" method="post" action="{{ url_for('save_packet_review', packet_id=packet.packet_id) }}">
+                        <form
+                            class="review-form"
+                            method="post"
+                            action="{{ url_for('save_packet_review', packet_id=packet.packet_id) }}"
+                        >
                             <input type="hidden" name="field_id" value="{{ row.field_id }}">
 
                             <label>
@@ -150,7 +162,7 @@
                     </div>
                 </article>
                 {% else %}
-                <div class="empty">No pending review rows found for this packet.</div>
+                <div class="empty">No review rows found for this packet.</div>
                 {% endfor %}
             </div>
         </section>

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
+from datetime import datetime
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -169,6 +170,66 @@ def save_review_decision(
         return False
 
     with review_csv.open("w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+def packet_has_unresolved_reviews(packet_id: str) -> bool:
+    """Return True when a packet still has review rows without final decisions."""
+    packet_dir = get_packet_dir(packet_id)
+    review_csv = packet_dir / "human_review_queue_FOR_REVIEW.csv"
+
+    if not review_csv.exists():
+        return True
+
+    final_statuses = {
+        "accepted_by_reviewer",
+        "corrected_by_reviewer",
+    }
+
+    with review_csv.open("r", newline="", encoding="utf-8-sig") as f:
+        rows = list(csv.DictReader(f))
+
+    for row in rows:
+        status = (row.get("status") or "").strip()
+        if status not in final_statuses:
+            return True
+
+    return False
+
+def approve_packet(packet_id: str, reviewer: str = "local_app") -> bool:
+    """Mark one packet approved in the packet registry."""
+    if not REGISTRY_PATH.exists():
+        return False
+    
+    if packet_has_unresolved_reviews(packet_id):
+        return False
+
+    with REGISTRY_PATH.open("r", newline="", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        fieldnames = reader.fieldnames or []
+        rows = list(reader)
+
+    updated = False
+    now = datetime.now().isoformat(timespec="seconds")
+
+    for row in rows:
+        if (row.get("packet_id") or "").strip() != packet_id:
+            continue
+
+        row["status"] = "approved"
+        row["reviewed_at"] = row.get("reviewed_at") or now
+        row["approved_at"] = now
+        row["updated_at"] = now
+        row["reviewer"] = reviewer
+        row["error"] = ""
+        updated = True
+        break
+
+    if not updated:
+        return False
+
+    with REGISTRY_PATH.open("w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)

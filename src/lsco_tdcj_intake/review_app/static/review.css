@@ -476,3 +476,12 @@ tr:last-child td {
     background: var(--lsco-orange);
     color: white;
 }
+.alert-box {
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--lsco-orange);
+    border-radius: 12px;
+    background: #fff7ef;
+    color: var(--ink);
+    font-weight: 800;
+}
