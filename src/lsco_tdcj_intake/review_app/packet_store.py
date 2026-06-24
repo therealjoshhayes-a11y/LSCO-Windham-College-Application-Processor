@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import csv
-from pathlib import Path
+import subprocess
+import sys
 from datetime import datetime
+from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -17,39 +19,40 @@ DEFAULT_VISIBLE_STATUSES = {
 
 
 def read_packet_registry() -> list[dict[str, str]]:
-    """Read packet registry rows for the review dashboard."""
+    """Read packet registry rows."""
     if not REGISTRY_PATH.exists():
         return []
 
     with REGISTRY_PATH.open("r", newline="", encoding="utf-8-sig") as f:
-        rows = list(csv.DictReader(f))
-
-    return sorted(rows, key=lambda row: row.get("packet_id", "").lower())
+        return list(csv.DictReader(f))
 
 
-def filter_packets(rows: list[dict[str, str]], status_filter: str = "active") -> list[dict[str, str]]:
+def filter_packets(
+    packets: list[dict[str, str]],
+    status_filter: str,
+) -> list[dict[str, str]]:
     """Filter packets for dashboard display."""
     status_filter = (status_filter or "active").strip().lower()
 
     if status_filter == "all":
-        return rows
+        return packets
 
     if status_filter == "active":
         return [
-            row for row in rows
-            if (row.get("status") or "").strip().lower() in DEFAULT_VISIBLE_STATUSES
+            packet for packet in packets
+            if (packet.get("status") or "").strip() in DEFAULT_VISIBLE_STATUSES
         ]
 
     return [
-        row for row in rows
-        if (row.get("status") or "").strip().lower() == status_filter
+        packet for packet in packets
+        if (packet.get("status") or "").strip() == status_filter
     ]
 
 
-def registry_summary(rows: list[dict[str, str]]) -> dict[str, int]:
-    """Count packets by status."""
-    summary: dict[str, int] = {
-        "total": len(rows),
+def registry_summary(packets: list[dict[str, str]]) -> dict[str, int]:
+    """Summarize packet counts by status."""
+    summary = {
+        "total": len(packets),
         "review_pending": 0,
         "review_in_progress": 0,
         "approved": 0,
@@ -57,11 +60,10 @@ def registry_summary(rows: list[dict[str, str]]) -> dict[str, int]:
         "failed": 0,
     }
 
-    for row in rows:
-        status = (row.get("status") or "").strip().lower()
-        if status not in summary:
-            summary[status] = 0
-        summary[status] += 1
+    for packet in packets:
+        status = (packet.get("status") or "").strip()
+        if status in summary:
+            summary[status] += 1
 
     return summary
 
@@ -69,9 +71,11 @@ def registry_summary(rows: list[dict[str, str]]) -> dict[str, int]:
 def get_packet(packet_id: str) -> dict[str, str] | None:
     """Return one packet registry row by packet_id."""
     packet_id = (packet_id or "").strip()
+
     for row in read_packet_registry():
         if (row.get("packet_id") or "").strip() == packet_id:
             return row
+
     return None
 
 
@@ -81,7 +85,7 @@ def get_packet_dir(packet_id: str) -> Path:
 
 
 def read_packet_review_rows(packet_id: str) -> list[dict[str, str]]:
-    """Read pending human review rows for one packet."""
+    """Read human review rows for one packet."""
     packet_dir = get_packet_dir(packet_id)
     review_csv = packet_dir / "human_review_queue_FOR_REVIEW.csv"
 
@@ -174,6 +178,9 @@ def save_review_decision(
         writer.writeheader()
         writer.writerows(rows)
 
+    return True
+
+
 def packet_has_unresolved_reviews(packet_id: str) -> bool:
     """Return True when a packet still has review rows without final decisions."""
     packet_dir = get_packet_dir(packet_id)
@@ -197,12 +204,71 @@ def packet_has_unresolved_reviews(packet_id: str) -> bool:
 
     return False
 
-def approve_packet(packet_id: str, reviewer: str = "local_app") -> bool:
-    """Mark one packet approved in the packet registry."""
-    if not REGISTRY_PATH.exists():
+
+def rebuild_final_packet_outputs(packet_id: str) -> bool:
+    """Rebuild reviewed packet outputs and admissions export from reviewer decisions."""
+    packet_dir = get_packet_dir(packet_id)
+
+    human_review_csv = packet_dir / "human_review_queue_FOR_REVIEW.csv"
+    machine_accepted_csv = packet_dir / "page1_machine_accepted.csv"
+    checkbox_summary_csv = packet_dir / "checkbox_review_summary.csv"
+    reviewed_packet_json = packet_dir / "reviewed_packet.json"
+    reviewed_packet_values_csv = packet_dir / "reviewed_packet_values.csv"
+    admissions_export_row_csv = packet_dir / "admissions_export_row.csv"
+
+    required_inputs = [
+        human_review_csv,
+        machine_accepted_csv,
+        checkbox_summary_csv,
+    ]
+
+    if any(not path.exists() for path in required_inputs):
         return False
-    
+
+    build_reviewed_cmd = [
+        sys.executable,
+        str(PROJECT_ROOT / "scripts" / "build_reviewed_packet.py"),
+        "--packet-id",
+        packet_id,
+        "--human-review-csv",
+        str(human_review_csv),
+        "--machine-accepted-csv",
+        str(machine_accepted_csv),
+        "--checkbox-summary-csv",
+        str(checkbox_summary_csv),
+        "--output-json",
+        str(reviewed_packet_json),
+        "--output-csv",
+        str(reviewed_packet_values_csv),
+    ]
+
+    export_admissions_cmd = [
+        sys.executable,
+        str(PROJECT_ROOT / "scripts" / "export_admissions_row.py"),
+        "--reviewed-packet-json",
+        str(reviewed_packet_json),
+        "--output-csv",
+        str(admissions_export_row_csv),
+    ]
+
+    try:
+        subprocess.run(build_reviewed_cmd, cwd=PROJECT_ROOT, check=True)
+        subprocess.run(export_admissions_cmd, cwd=PROJECT_ROOT, check=True)
+    except subprocess.CalledProcessError:
+        return False
+
+    return True
+
+
+def approve_packet(packet_id: str, reviewer: str = "local_app") -> bool:
+    """Rebuild final outputs and mark one packet approved in the packet registry."""
     if packet_has_unresolved_reviews(packet_id):
+        return False
+
+    if not rebuild_final_packet_outputs(packet_id):
+        return False
+
+    if not REGISTRY_PATH.exists():
         return False
 
     with REGISTRY_PATH.open("r", newline="", encoding="utf-8-sig") as f:
