@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>LSCO TDCJ Intake Review Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='review.css') }}">
+</head>
+<body>
+    <main class="page">
+        <header class="hero">
+            <div class="brand-block">
+                <img
+                    class="brand-logo"
+                    src="{{ url_for('static', filename='LSCO-logo-horizontal-green.png') }}"
+                    alt="Lamar State College Orange"
+                >
+                <div>
+                    <p class="eyebrow">Lamar State College Orange</p>
+                    <h1>TDCJ Intake Review Dashboard</h1>
+                    <p class="subtitle">Local review control panel for Windham College application packets</p>
+                </div>
+            </div>
+            <div class="hero-badge">
+                <span>Local MVP</span>
+                <strong>No Cloud OCR</strong>
+            </div>
+        </header>
+
+        <section class="summary-grid">
+            <div class="summary-card primary">
+                <span class="summary-label">Total Packets</span>
+                <strong>{{ summary.total }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Needs Review</span>
+                <strong>{{ summary.review_pending }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">In Progress</span>
+                <strong>{{ summary.review_in_progress }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Approved</span>
+                <strong>{{ summary.approved }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Exported</span>
+                <strong>{{ summary.exported }}</strong>
+            </div>
+            <div class="summary-card danger">
+                <span class="summary-label">Failed</span>
+                <strong>{{ summary.failed }}</strong>
+            </div>
+        </section>
+
+        <nav class="filters" aria-label="Packet filters">
+            <a href="/?status=active" class="{{ 'active' if status_filter == 'active' else '' }}">Active</a>
+            <a href="/?status=review_pending" class="{{ 'active' if status_filter == 'review_pending' else '' }}">Needs Review</a>
+            <a href="/?status=review_in_progress" class="{{ 'active' if status_filter == 'review_in_progress' else '' }}">In Progress</a>
+            <a href="/?status=approved" class="{{ 'active' if status_filter == 'approved' else '' }}">Approved</a>
+            <a href="/?status=exported" class="{{ 'active' if status_filter == 'exported' else '' }}">Exported</a>
+            <a href="/?status=failed" class="{{ 'active' if status_filter == 'failed' else '' }}">Failed</a>
+            <a href="/?status=all" class="{{ 'active' if status_filter == 'all' else '' }}">All</a>
+        </nav>
+
+        <section class="packet-table-card">
+            <div class="table-header">
+                <div>
+                    <h2>Packet Queue</h2>
+                    <p>Default view hides approved and exported packets.</p>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Packet</th>
+                        <th>Status</th>
+                        <th>Pending</th>
+                        <th>Last</th>
+                        <th>First</th>
+                        <th>MI</th>
+                        <th>TDCJ #</th>
+                        <th>DOB</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for packet in packets %}
+                    <tr>
+                        <td class="mono packet-id">{{ packet.packet_id }}</td>
+                        <td><span class="status-pill status-{{ packet.status }}">{{ packet.status }}</span></td>
+                        <td><strong>{{ packet.pending_review_count }}</strong></td>
+                        <td>{{ packet.student_last_name }}</td>
+                        <td>{{ packet.student_first_name }}</td>
+                        <td>{{ packet.student_mi }}</td>
+                        <td class="mono">{{ packet.tdcj_number }}</td>
+                        <td class="mono">{{ packet.dob }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="empty">No packets match this filter.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>
