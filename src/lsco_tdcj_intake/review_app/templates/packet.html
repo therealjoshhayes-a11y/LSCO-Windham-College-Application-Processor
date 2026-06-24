@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Packet {{ packet.packet_id }} | LSCO TDCJ Intake Review</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='review.css') }}">
+</head>
+<body>
+    <main class="page">
+        <header class="hero">
+            <div class="brand-block">
+                <img
+                    class="brand-logo"
+                    src="{{ url_for('static', filename='LSCO-logo-horizontal-green.png') }}"
+                    alt="Lamar State College Orange"
+                >
+                <div>
+                    <p class="eyebrow">Packet Detail</p>
+                    <h1>{{ packet.student_last_name }}, {{ packet.student_first_name }}</h1>
+                    <p class="subtitle">
+                        Packet {{ packet.packet_id }} · TDCJ #{{ packet.tdcj_number }} · DOB {{ packet.dob }}
+                    </p>
+                </div>
+            </div>
+            <div class="hero-badge">
+                <span>Status</span>
+                <strong>{{ packet.status }}</strong>
+            </div>
+        </header>
+
+        <nav class="filters">
+            <a href="{{ url_for('index') }}">← Dashboard</a>
+        </nav>
+
+        <section class="summary-grid">
+            <div class="summary-card primary">
+                <span class="summary-label">Pending Review Fields</span>
+                <strong>{{ review_rows|length }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Last Name</span>
+                <strong>{{ packet.student_last_name }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">First Name</span>
+                <strong>{{ packet.student_first_name }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">TDCJ #</span>
+                <strong>{{ packet.tdcj_number }}</strong>
+            </div>
+        </section>
+
+        <section class="packet-table-card">
+            <div class="table-header">
+                <div>
+                    <h2>Pending Review Queue</h2>
+                    <p>Read-only view. Review actions come next.</p>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field ID</th>
+                        <th>Label</th>
+                        <th>Machine Value</th>
+                        <th>Issue / Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in review_rows %}
+                    <tr>
+                        <td class="mono packet-id">{{ row.field_id }}</td>
+                        <td>{{ row.label or row.field_label or row.name }}</td>
+                        <td class="mono">
+                            {{ row.machine_value or row.ocr_value or row.suggested_value or row.value }}
+                        </td>
+                        <td>{{ row.reason or row.review_reason or row.status or row.issue }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="empty">No pending review rows found for this packet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>

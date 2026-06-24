@@ -302,3 +302,12 @@ tr:last-child td {
         overflow-x: auto;
     }
 }
+.packet-id a {
+    color: var(--lsco-green);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.packet-id a:hover {
+    text-decoration: underline;
+}

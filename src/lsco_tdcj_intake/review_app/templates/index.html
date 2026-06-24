@@ -87,7 +87,11 @@
                 <tbody>
                     {% for packet in packets %}
                     <tr>
-                        <td class="mono packet-id">{{ packet.packet_id }}</td>
+                        <td class="mono packet-id">
+                             <a href="{{ url_for('packet_detail', packet_id=packet.packet_id) }}">
+                                {{ packet.packet_id }}
+                            </a>
+                        </td>
                         <td><span class="status-pill status-{{ packet.status }}">{{ packet.status }}</span></td>
                         <td><strong>{{ packet.pending_review_count }}</strong></td>
                         <td>{{ packet.student_last_name }}</td>

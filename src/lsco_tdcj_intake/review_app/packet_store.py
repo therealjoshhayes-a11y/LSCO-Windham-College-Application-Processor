@@ -63,3 +63,29 @@ def registry_summary(rows: list[dict[str, str]]) -> dict[str, int]:
         summary[status] += 1
 
     return summary
+
+
+def get_packet(packet_id: str) -> dict[str, str] | None:
+    """Return one packet registry row by packet_id."""
+    packet_id = (packet_id or "").strip()
+    for row in read_packet_registry():
+        if (row.get("packet_id") or "").strip() == packet_id:
+            return row
+    return None
+
+
+def get_packet_dir(packet_id: str) -> Path:
+    """Return the processed review packet folder path."""
+    return REVIEW_PACKETS_ROOT / packet_id
+
+
+def read_packet_review_rows(packet_id: str) -> list[dict[str, str]]:
+    """Read pending human review rows for one packet."""
+    packet_dir = get_packet_dir(packet_id)
+    review_csv = packet_dir / "human_review_queue_FOR_REVIEW.csv"
+
+    if not review_csv.exists():
+        return []
+
+    with review_csv.open("r", newline="", encoding="utf-8-sig") as f:
+        return list(csv.DictReader(f))
