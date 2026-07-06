@@ -68,6 +68,14 @@ ADMISSIONS_HEADERS = [
     "First Gen",
 ]
 
+POLUNSKY_STREET = "3872 FM 350 South"
+POLUNSKY_UNIT = "Polunsky Unit"
+POLUNSKY_CITY = "Livingston"
+POLUNSKY_STATE = "TX"
+POLUNSKY_ZIP = "77351"
+POLUNSKY_PHONE = "409-882-3090"
+PRODUCTION_STUDENT_TYPE = "A"
+
 TERM_LABELS = {
     "fall": "Fall",
     "spring": "Spring",
@@ -182,13 +190,23 @@ def build_export_row(packet: dict) -> dict[str, str]:
     row["Date of Birth"] = field_value(packet, "p1_date_of_birth")
     row["SSN"] = field_value(packet, "p1_ssn")
 
+    tdcj_number = field_value(packet, "p1_tdcj_number")
+
+    row["TXST ID"] = tdcj_number
+    row["Address - Street"] = POLUNSKY_STREET
+    row["Address - Street 2"] = f"{POLUNSKY_UNIT} - TDCJ #{tdcj_number}" if tdcj_number else POLUNSKY_UNIT
+    row["Address - City"] = POLUNSKY_CITY
+    row["Address - State"] = POLUNSKY_STATE
+    row["Address - Zip"] = POLUNSKY_ZIP
+    row["Phone"] = POLUNSKY_PHONE
+
     row["High School - Name"] = field_value(packet, "p1_hs_name")
     row["College 1 - Name"] = field_value(packet, "p1_prev_college_row1_name")
 
     row["Start Term"] = start_term(packet)
     row["Admission Type 1"] = admission_type(packet)
     row["Admission Type 2"] = ""
-    row["Student Type"] = student_type(packet)
+    row["Student Type"] = PRODUCTION_STUDENT_TYPE
 
     # Current project defaults / intentionally blank fields.
     row["Address - Country"] = ""
