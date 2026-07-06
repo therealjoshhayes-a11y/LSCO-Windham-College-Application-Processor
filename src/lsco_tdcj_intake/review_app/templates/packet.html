@@ -167,5 +167,37 @@
             </div>
         </section>
     </main>
+<script>
+document.querySelectorAll(".review-form").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const clickedButton = event.submitter;
+        const formData = new FormData(form);
+
+        if (clickedButton && clickedButton.name) {
+            formData.set(clickedButton.name, clickedButton.value);
+        }
+
+        const response = await fetch(form.getAttribute("action"), {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "fetch"
+            }
+        });
+
+        if (!response.ok) {
+            alert("Save failed. Please try again.");
+            return;
+        }
+
+        const card = form.closest(".review-card");
+        if (card) {
+            card.classList.add("review-card-saved");
+        }
+    });
+});
+</script>
 </body>
 </html>

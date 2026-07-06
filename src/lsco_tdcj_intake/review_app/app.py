@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from flask import Flask, abort, redirect, render_template, request, send_file, url_for
+from flask import Flask, abort, jsonify, redirect, render_template, request, send_file, url_for
 
 from lsco_tdcj_intake.review_app.packet_store import (
     REVIEW_PACKETS_ROOT,
@@ -81,6 +81,16 @@ def create_app() -> Flask:
 
         if not saved:
             abort(400)
+
+        if request.headers.get("X-Requested-With") == "fetch":
+            return jsonify(
+                {
+                    "ok": True,
+                    "packet_id": packet_id,
+                    "field_id": field_id,
+                    "action": action,
+                }
+            )
 
         return redirect(url_for("packet_detail", packet_id=packet_id))
 
