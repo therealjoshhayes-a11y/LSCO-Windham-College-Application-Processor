@@ -126,7 +126,20 @@ def get_packet_value(packet_dir: Path, field_id: str) -> str:
 def get_pending_review_count(packet_dir: Path) -> int:
     review_csv = packet_dir / "human_review_queue_FOR_REVIEW.csv"
     rows = read_csv_rows(review_csv)
-    return len(rows)
+
+    final_statuses = {
+        "accepted_by_reviewer",
+        "corrected_by_reviewer",
+    }
+
+    pending = 0
+
+    for row in rows:
+        status = (row.get("status") or "").strip()
+        if status not in final_statuses:
+            pending += 1
+
+    return pending
 
 
 def infer_source_tif(packet_id: str) -> str:
@@ -149,10 +162,11 @@ def build_row_for_packet(packet_dir: Path, existing: dict[str, str] | None) -> P
     pending_count = get_pending_review_count(packet_dir)
 
     default_status = "review_pending"
-
     status = default_status
 
-    if existing:
+    if pending_count > 0:
+        status = "review_pending"
+    elif existing:
         existing_status = (existing.get("status") or "").strip()
         if existing_status in FINAL_STATUSES_TO_PRESERVE:
             status = existing_status
@@ -164,6 +178,22 @@ def build_row_for_packet(packet_dir: Path, existing: dict[str, str] | None) -> P
     created_at = existing.get("created_at", "") if existing else ""
     if not created_at:
         created_at = timestamp
+
+    reviewed_at = existing.get("reviewed_at", "") if existing else ""
+    approved_at = existing.get("approved_at", "") if existing else ""
+    exported_at = existing.get("exported_at", "") if existing else ""
+    reviewer = existing.get("reviewer", "") if existing else ""
+    approved_pdf_path = existing.get("approved_pdf_path", "") if existing else ""
+    admissions_export_path = existing.get("admissions_export_path", "") if existing else ""
+    error = existing.get("error", "") if existing else ""
+
+    if status == "review_pending":
+        reviewed_at = ""
+        approved_at = ""
+        exported_at = ""
+        reviewer = ""
+        approved_pdf_path = ""
+        admissions_export_path = ""
 
     row = PacketRegistryRow(
         packet_id=packet_id,
@@ -179,13 +209,13 @@ def build_row_for_packet(packet_dir: Path, existing: dict[str, str] | None) -> P
         pending_review_count=str(pending_count),
         created_at=created_at,
         updated_at=timestamp,
-        reviewed_at=existing.get("reviewed_at", "") if existing else "",
-        approved_at=existing.get("approved_at", "") if existing else "",
-        exported_at=existing.get("exported_at", "") if existing else "",
-        reviewer=existing.get("reviewer", "") if existing else "",
-        approved_pdf_path=existing.get("approved_pdf_path", "") if existing else "",
-        admissions_export_path=existing.get("admissions_export_path", "") if existing else "",
-        error=existing.get("error", "") if existing else "",
+        reviewed_at=reviewed_at,
+        approved_at=approved_at,
+        exported_at=exported_at,
+        reviewer=reviewer,
+        approved_pdf_path=approved_pdf_path,
+        admissions_export_path=admissions_export_path,
+        error=error,
     )
 
     return row
