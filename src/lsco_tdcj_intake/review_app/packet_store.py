@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import csv
+import json
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 
+from PIL import Image
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 REVIEW_PACKETS_ROOT = PROJECT_ROOT / "data" / "processed" / "review_packets"
 REGISTRY_PATH = REVIEW_PACKETS_ROOT / "packet_registry.csv"
+APPROVED_PACKET_ARCHIVE_ROOT = PROJECT_ROOT / "data" / "exports" / "approved_packets"
 
 DEFAULT_VISIBLE_STATUSES = {
     "review_pending",
@@ -82,6 +86,90 @@ def get_packet(packet_id: str) -> dict[str, str] | None:
 def get_packet_dir(packet_id: str) -> Path:
     """Return the processed review packet folder path."""
     return REVIEW_PACKETS_ROOT / packet_id
+
+
+def safe_filename_part(value: str) -> str:
+    """Return a filesystem-safe uppercase filename component."""
+    cleaned = "".join(
+        char if char.isalnum() else "_"
+        for char in (value or "").strip().upper()
+    )
+    cleaned = "_".join(part for part in cleaned.split("_") if part)
+    return cleaned or "UNKNOWN"
+
+
+def reviewed_packet_field(packet_id: str, field_id: str) -> str:
+    """Read one approved/reviewed field value from reviewed_packet.json."""
+    reviewed_packet_json = get_packet_dir(packet_id) / "reviewed_packet.json"
+
+    if not reviewed_packet_json.exists():
+        return ""
+
+    with reviewed_packet_json.open("r", encoding="utf-8") as f:
+        packet = json.load(f)
+
+    fields = packet.get("fields", {})
+    field = fields.get(field_id, {})
+    return str(field.get("value", "") or "").strip()
+
+
+def original_packet_tif_path(packet_id: str, registry_row: dict[str, str]) -> Path:
+    """Return the original source TIF path for one packet."""
+    source_tif = (registry_row.get("source_tif") or "").strip()
+
+    if source_tif:
+        source_path = Path(source_tif)
+        if not source_path.is_absolute():
+            source_path = PROJECT_ROOT / source_path
+
+        if source_path.exists():
+            return source_path
+
+    fallback_path = PROJECT_ROOT / "data" / "incoming" / "scans" / f"{packet_id}.tif"
+    return fallback_path
+
+
+def approved_packet_pdf_path(packet_id: str) -> Path:
+    """Return the approved archive PDF path for one packet."""
+    last_name = safe_filename_part(reviewed_packet_field(packet_id, "p1_last_name"))
+    first_name = safe_filename_part(reviewed_packet_field(packet_id, "p1_first_name"))
+    tdcj_number = safe_filename_part(reviewed_packet_field(packet_id, "p1_tdcj_number"))
+
+    filename = f"{last_name}_{first_name}_TDCJ{tdcj_number}.pdf"
+    return APPROVED_PACKET_ARCHIVE_ROOT / filename
+
+
+def create_approved_packet_pdf(packet_id: str, registry_row: dict[str, str]) -> Path:
+    """Convert the original two-frame TIF packet into one approved archive PDF."""
+    source_tif = original_packet_tif_path(packet_id, registry_row)
+    output_pdf = approved_packet_pdf_path(packet_id)
+
+    if not source_tif.exists():
+        raise FileNotFoundError(f"Source TIF not found: {source_tif}")
+
+    APPROVED_PACKET_ARCHIVE_ROOT.mkdir(parents=True, exist_ok=True)
+
+    with Image.open(source_tif) as tif:
+        frames = []
+
+        for frame_index in range(getattr(tif, "n_frames", 1)):
+            tif.seek(frame_index)
+            frames.append(tif.convert("RGB").copy())
+
+    if not frames:
+        raise ValueError(f"No frames found in source TIF: {source_tif}")
+
+    first_frame = frames[0]
+    remaining_frames = frames[1:]
+
+    first_frame.save(
+        output_pdf,
+        "PDF",
+        save_all=True,
+        append_images=remaining_frames,
+    )
+
+    return output_pdf
 
 
 def read_packet_review_rows(packet_id: str) -> list[dict[str, str]]:
@@ -308,6 +396,9 @@ def approve_packet(packet_id: str, reviewer: str = "local_app") -> bool:
         row["approved_at"] = now
         row["updated_at"] = now
         row["reviewer"] = reviewer
+        approved_pdf = create_approved_packet_pdf(packet_id, row)
+
+        row["approved_pdf_path"] = str(approved_pdf)
         row["admissions_export_path"] = str(
             get_packet_dir(packet_id) / "admissions_export_row.csv"
         )
