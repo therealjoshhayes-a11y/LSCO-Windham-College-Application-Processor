@@ -43,6 +43,16 @@ REVIEW_STATUSES = {
 }
 
 
+ALWAYS_REVIEW_FIELDS = {
+    "p1_last_name",
+    "p1_first_name",
+    "p1_mi",
+    "p1_tdcj_number",
+    "p1_ssn",
+    "p1_date_of_birth",
+}
+
+
 IDENTITY_NUMERIC_FIELDS = {
     "p1_tdcj_number",
     "p1_ssn",
@@ -118,11 +128,13 @@ def build_review_row(
     if existing_notes:
         notes_parts.append(existing_notes)
 
-    if field_id in IDENTITY_NUMERIC_FIELDS:
+    if field_id in ALWAYS_REVIEW_FIELDS:
         notes_parts.append("identity-critical field; reviewer must verify")
+
+    if field_id in IDENTITY_NUMERIC_FIELDS:
         if numeric_digits:
             notes_parts.append(shape_note(field_id, numeric_digits))
-
+    
     if numeric_digits:
         notes_parts.append(
             f"numeric_fullfield_candidate={numeric_digits}; "
@@ -131,7 +143,7 @@ def build_review_row(
 
     return {
         "field_id": field_id,
-        "status": ocr_row.get("status", ""),
+        "status": "identity_needs_review" if field_id in ALWAYS_REVIEW_FIELDS else ocr_row.get("status", ""),
         "raw_text": first_present(ocr_row, ["raw_text", "text", "ocr_text"]),
         "normalized_text": first_present(
             ocr_row,
@@ -215,8 +227,10 @@ def main() -> int:
     review_rows = []
 
     for row in ocr_rows:
+        field_id = row.get("field_id", "")
         status = row.get("status", "")
-        if status in REVIEW_STATUSES:
+
+        if status in REVIEW_STATUSES or field_id in ALWAYS_REVIEW_FIELDS:
             review_rows.append(build_review_row(row, numeric_evidence))
 
     write_review_queue(review_rows, output_csv)

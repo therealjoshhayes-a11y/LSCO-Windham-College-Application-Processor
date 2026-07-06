@@ -47,6 +47,7 @@ OCR_REVIEW_STATUSES = {
     "ocr_candidate_needs_review",
     "review_needed",
     "needs_review",
+    "identity_needs_review",
     "uncertain",
     "invalid",
 }
