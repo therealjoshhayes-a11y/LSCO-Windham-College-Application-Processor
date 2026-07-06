@@ -92,8 +92,27 @@ def read_packet_review_rows(packet_id: str) -> list[dict[str, str]]:
     if not review_csv.exists():
         return []
 
+    identity_order = {
+        "p1_last_name": 0,
+        "p1_first_name": 1,
+        "p1_mi": 2,
+        "p1_tdcj_number": 3,
+        "p1_date_of_birth": 4,
+        "p1_ssn": 5,
+    }
+
+    def row_sort_key(row: dict[str, str]) -> tuple[int, int, str]:
+        field_id = (row.get("field_id") or "").strip()
+
+        if field_id in identity_order:
+            return (0, identity_order[field_id], field_id)
+
+        return (1, 999, field_id)
+
     with review_csv.open("r", newline="", encoding="utf-8-sig") as f:
-        return list(csv.DictReader(f))
+        rows = list(csv.DictReader(f))
+
+    return sorted(rows, key=row_sort_key)
 
 
 def add_evidence_paths(packet_id: str, rows: list[dict[str, str]]) -> list[dict[str, str]]:
