@@ -68,7 +68,7 @@ def find_square_candidates(
     min_area: float = 100.0,
     max_area_ratio: float = 0.02,
     min_aspect: float = 0.70,
-    max_aspect: float = 1.50,
+    max_aspect: float = 1.60,
 ) -> list[FiducialCandidate]:
     """Find square-like dark connected components."""
     mask = threshold_dark_regions(gray_image)

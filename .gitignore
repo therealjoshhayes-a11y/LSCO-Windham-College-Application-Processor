@@ -52,3 +52,6 @@ data/rejected/
 src/*.egg-info/
 
 data/
+
+# Keep safe environment template tracked
+!.env.example
